@@ -52,14 +52,28 @@ export default function ProductCard({ product }: ProductCardProps) {
               justifyContent: 'center',
               fontSize: '4rem',
               background: 'linear-gradient(135deg, var(--green-50), var(--earth-50))',
+              overflow: 'hidden',
             }}
           >
-            {product.categorySlug === 'seeds' && '🌱'}
-            {product.categorySlug === 'fertilizers' && '🧪'}
-            {product.categorySlug === 'pesticides' && '🛡️'}
-            {product.categorySlug === 'farm-tools' && '🔧'}
-            {product.categorySlug === 'irrigation' && '💧'}
-            {product.categorySlug === 'animal-feed' && '🐄'}
+            {product.images && product.images[0] && (product.images[0].startsWith('http') || product.images[0].startsWith('/images/products/')) ? (
+              <img
+                src={product.images[0]}
+                alt={name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <>
+                {product.categorySlug === 'seeds' && '🌱'}
+                {product.categorySlug === 'fertilizers' && '🧪'}
+                {product.categorySlug === 'pesticides' && '🛡️'}
+                {product.categorySlug === 'farm-tools' && '🔧'}
+                {product.categorySlug === 'irrigation' && '💧'}
+                {product.categorySlug === 'animal-feed' && '🐄'}
+              </>
+            )}
           </div>
           <div className="product-card-badge">
             {hasDiscount && (

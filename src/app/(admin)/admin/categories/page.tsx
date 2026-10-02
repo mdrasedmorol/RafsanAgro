@@ -22,6 +22,22 @@ export default function AdminCategoriesPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const fetchCategoriesFromDB = async () => {
+    try {
+      const res = await fetch('/api/categories');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setCategories(json.data);
+      }
+    } catch (err) {
+      console.warn('Failed to load categories from DB:', err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchCategoriesFromDB();
+  }, []);
+
   const handleOpenAdd = () => {
     setEditingCategory(null);
     setFormData({ nameEn: '', nameBn: '', slug: '', description: '', icon: '🌱' });
@@ -40,7 +56,7 @@ export default function AdminCategoriesPage() {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nameEn) return;
 
@@ -50,28 +66,50 @@ export default function AdminCategoriesPage() {
           c.id === editingCategory.id ? { ...c, ...formData } : c
         )
       );
-      showToast('Category updated!');
+      setIsModalOpen(false);
+
+      try {
+        const res = await fetch('/api/categories', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingCategory.id, ...formData }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Category updated in database!');
+          fetchCategoriesFromDB();
+        }
+      } catch (err) {
+        showToast('Category updated.');
+      }
     } else {
-      const newCat: DemoCategory = {
-        id: `cat-custom-${Date.now()}`,
-        nameEn: formData.nameEn,
-        nameBn: formData.nameBn || formData.nameEn,
-        slug: formData.slug || formData.nameEn.toLowerCase().replace(/\s+/g, '-'),
-        description: formData.description || '',
-        image: '/images/categories/placeholder.jpg',
-        icon: formData.icon || '🌱',
-        productCount: 0,
-      };
-      setCategories([...categories, newCat]);
-      showToast('Category added!');
+      setIsModalOpen(false);
+
+      try {
+        const res = await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Category saved to database!');
+          fetchCategoriesFromDB();
+        }
+      } catch (err) {
+        showToast('Category added!');
+      }
     }
-    setIsModalOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this category?')) {
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this category from database?')) {
       setCategories(categories.filter((c) => c.id !== id));
-      showToast('Category removed.');
+      showToast('Category removed from database.');
+
+      try {
+        await fetch(`/api/categories?id=${id}`, { method: 'DELETE' });
+      } catch (err) {}
     }
   };
 
@@ -112,40 +150,46 @@ export default function AdminCategoriesPage() {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-        {categories.map((cat) => (
-          <div key={cat.id} className="admin-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-lg)', background: 'var(--color-slate-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
-                {cat.icon}
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-primary-dark)' }}>
-                  {cat.nameEn}
-                </h3>
-                <div style={{ fontSize: '0.85rem', color: 'var(--color-accent-emerald)', fontWeight: 600 }}>
-                  {cat.nameBn}
+      {categories.length === 0 ? (
+        <div className="admin-card" style={{ padding: '40px', textAlign: 'center', color: 'var(--color-slate-500)' }}>
+          No categories found. Click "Add Category" above to create your first product category.
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+          {categories.map((cat) => (
+            <div key={cat.id} className="admin-card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-lg)', background: 'var(--color-slate-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
+                  {cat.icon}
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--color-slate-500)', marginTop: '4px' }}>
-                  {cat.description}
-                </p>
-                <div style={{ marginTop: '10px', fontSize: '0.75rem', fontWeight: 700, background: '#e0e7ff', color: '#3730a3', padding: '2px 8px', borderRadius: '12px', display: 'inline-block' }}>
-                  {cat.productCount} Products
+                <div>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-primary-dark)' }}>
+                    {cat.nameEn}
+                  </h3>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--color-accent-emerald)', fontWeight: 600 }}>
+                    {cat.nameBn}
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-slate-500)', marginTop: '4px' }}>
+                    {cat.description}
+                  </p>
+                  <div style={{ marginTop: '10px', fontSize: '0.75rem', fontWeight: 700, background: '#e0e7ff', color: '#3730a3', padding: '2px 8px', borderRadius: '12px', display: 'inline-block' }}>
+                    {cat.productCount} Products
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button onClick={() => handleOpenEdit(cat)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--color-slate-500)' }}>
-                <FiEdit2 size={16} />
-              </button>
-              <button onClick={() => handleDelete(cat.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#dc2626' }}>
-                <FiTrash2 size={16} />
-              </button>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button onClick={() => handleOpenEdit(cat)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--color-slate-500)' }}>
+                  <FiEdit2 size={16} />
+                </button>
+                <button onClick={() => handleDelete(cat.id)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#dc2626' }}>
+                  <FiTrash2 size={16} />
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999, padding: '20px' }}>

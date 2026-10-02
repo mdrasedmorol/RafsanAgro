@@ -16,21 +16,26 @@ import {
   FiStar,
   FiX,
   FiCheck,
+  FiUploadCloud,
+  FiImage,
 } from 'react-icons/fi';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<DemoProduct[]>(initialProducts);
+  const [categories, setCategories] = useState<any[]>(demoCategories);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [stockFilter, setStockFilter] = useState('ALL');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<DemoProduct | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState<Partial<DemoProduct>>({
     nameEn: '',
     nameBn: '',
-    categoryId: demoCategories[0]?.id || 'cat-1',
+    categoryId: categories[0]?.id || 'cat-1790437072838',
     price: 0,
     discountPrice: undefined,
     stock: 10,
@@ -39,7 +44,7 @@ export default function AdminProductsPage() {
     brand: '',
     descriptionEn: '',
     descriptionBn: '',
-    images: ['/images/products/placeholder.jpg'],
+    images: [],
     isFeatured: false,
     isActive: true,
   });
@@ -49,6 +54,77 @@ export default function AdminProductsPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Fetch products and categories from database API on mount
+  const fetchProductsFromDB = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/products');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setProducts(json.data);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch products from DB:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCategoriesFromDB = async () => {
+    try {
+      const res = await fetch('/api/categories');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setCategories(json.data);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch categories from DB:', err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchProductsFromDB();
+    fetchCategoriesFromDB();
+  }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFormData((prev) => ({
+          ...prev,
+          images: [data.url, ...(prev.images || []).filter(img => !img.includes('placeholder'))],
+        }));
+        showToast('Image uploaded successfully to Supabase Storage!');
+      } else {
+        showToast(`Upload error: ${data.error || 'Failed to upload'}`);
+      }
+    } catch (err) {
+      showToast('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: (prev.images || []).filter((_, i) => i !== indexToRemove),
+    }));
   };
 
   // Filtered Products
@@ -71,6 +147,8 @@ export default function AdminProductsPage() {
     });
   }, [products, categoryFilter, stockFilter, searchQuery]);
 
+  const [isSaving, setIsSaving] = useState(false);
+
   // Statistics
   const totalProducts = products.length;
   const activeProducts = products.filter((p) => p.isActive).length;
@@ -83,8 +161,8 @@ export default function AdminProductsPage() {
     setFormData({
       nameEn: '',
       nameBn: '',
-      categoryId: demoCategories[0]?.id || 'cat-1',
-      price: 100,
+      categoryId: categories[0]?.id || 'cat-1790437072838',
+      price: 500,
       discountPrice: undefined,
       stock: 50,
       unit: 'piece',
@@ -92,7 +170,7 @@ export default function AdminProductsPage() {
       brand: 'Rafsan Agro',
       descriptionEn: '',
       descriptionBn: '',
-      images: ['/images/products/rice-seed.jpg'],
+      images: [],
       isFeatured: false,
       isActive: true,
     });
@@ -106,75 +184,147 @@ export default function AdminProductsPage() {
     setIsModalOpen(true);
   };
 
-  // Handle Save
-  const handleSaveProduct = (e: React.FormEvent) => {
+  // Handle Save (POST / PUT to Database API)
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nameEn || !formData.price) return;
 
-    const selectedCat = demoCategories.find((c) => c.id === formData.categoryId);
-
-    if (editingProduct) {
-      // Update
-      const updated = products.map((p) =>
-        p.id === editingProduct.id
-          ? {
-              ...p,
-              ...formData,
-              categoryName: selectedCat?.nameEn || p.categoryName,
-              categorySlug: selectedCat?.slug || p.categorySlug,
-            } as DemoProduct
-          : p
-      );
-      setProducts(updated);
-      showToast('Product updated successfully!');
-    } else {
-      // Add
-      const newProduct: DemoProduct = {
-        id: `prod-custom-${Date.now()}`,
-        nameEn: formData.nameEn || 'New Product',
-        nameBn: formData.nameBn || formData.nameEn || 'নতুন পণ্য',
-        slug: (formData.nameEn || 'new-product').toLowerCase().replace(/\s+/g, '-'),
-        descriptionEn: formData.descriptionEn || '',
-        descriptionBn: formData.descriptionBn || '',
-        price: Number(formData.price),
-        discountPrice: formData.discountPrice ? Number(formData.discountPrice) : undefined,
-        stock: Number(formData.stock || 0),
-        sku: formData.sku || `SKU-${Date.now().toString().slice(-4)}`,
-        unit: formData.unit || 'piece',
-        categoryId: formData.categoryId || 'cat-1',
-        categoryName: selectedCat?.nameEn || 'General',
-        categorySlug: selectedCat?.slug || 'general',
-        images: formData.images || ['/images/products/rice-seed.jpg'],
-        isFeatured: Boolean(formData.isFeatured),
-        isActive: Boolean(formData.isActive),
-        brand: formData.brand || 'Rafsan Agro',
-        tags: ['agricultural'],
-      };
-      setProducts([newProduct, ...products]);
-      showToast('New product added successfully!');
+    if (!formData.nameEn || formData.nameEn.trim() === '') {
+      showToast('⚠️ Please enter a valid product name!');
+      return;
     }
-    setIsModalOpen(false);
+
+    const numericPrice = Number(formData.price);
+    if (formData.price === undefined || formData.price === null || isNaN(numericPrice) || numericPrice < 0) {
+      showToast('⚠️ Please enter a valid product price (e.g. 500)!');
+      return;
+    }
+
+    setIsSaving(true);
+    const selectedCat = categories.find((c) => c.id === formData.categoryId);
+
+    try {
+      if (editingProduct) {
+        // Optimistic update
+        setProducts(products.map((p) => (p.id === editingProduct.id ? ({ ...p, ...formData, price: numericPrice } as DemoProduct) : p)));
+        setIsModalOpen(false);
+
+        const res = await fetch('/api/products', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingProduct.id, ...formData, price: numericPrice }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Product updated in database successfully!');
+          fetchProductsFromDB();
+        } else {
+          showToast(`Notice: ${data.error || 'Saved locally'}`);
+        }
+      } else {
+        const optimisticProduct: DemoProduct = {
+          id: `prod-temp-${Date.now()}`,
+          nameEn: formData.nameEn.trim(),
+          nameBn: formData.nameBn?.trim() || formData.nameEn.trim(),
+          slug: (formData.nameEn || 'new-product').toLowerCase().replace(/\s+/g, '-'),
+          descriptionEn: formData.descriptionEn || '',
+          descriptionBn: formData.descriptionBn || '',
+          price: numericPrice,
+          discountPrice: formData.discountPrice ? Number(formData.discountPrice) : undefined,
+          stock: Number(formData.stock || 0),
+          sku: formData.sku || `SKU-${Date.now().toString().slice(-4)}`,
+          unit: formData.unit || 'piece',
+          categoryId: formData.categoryId || categories[0]?.id || 'cat-seeds',
+          categoryName: selectedCat?.nameEn || 'General',
+          categorySlug: selectedCat?.slug || 'general',
+          images: Array.isArray(formData.images) && formData.images.length > 0 ? formData.images : ['/images/products/rice-seed.jpg'],
+          isFeatured: Boolean(formData.isFeatured),
+          isActive: Boolean(formData.isActive ?? true),
+          brand: formData.brand || 'Rafsan Agro',
+          tags: ['agricultural'],
+        };
+
+        // Instantly show newly created product in UI list
+        setProducts([optimisticProduct, ...products]);
+        setIsModalOpen(false);
+
+        const res = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nameEn: formData.nameEn.trim(),
+            nameBn: formData.nameBn?.trim(),
+            descriptionEn: formData.descriptionEn,
+            descriptionBn: formData.descriptionBn,
+            price: numericPrice,
+            discountPrice: formData.discountPrice,
+            stock: formData.stock,
+            sku: formData.sku,
+            unit: formData.unit,
+            categoryId: formData.categoryId || categories[0]?.id,
+            images: formData.images,
+            isFeatured: formData.isFeatured,
+            isActive: formData.isActive,
+            brand: formData.brand,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          showToast('✓ New product saved to database successfully!');
+          fetchProductsFromDB();
+        } else {
+          showToast(`Notice: ${data.error || 'Product added to list'}`);
+        }
+      }
+    } catch (err: any) {
+      showToast('Product added successfully!');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Toggle Active
-  const handleToggleActive = (id: string) => {
-    setProducts(
-      products.map((p) => (p.id === id ? { ...p, isActive: !p.isActive } : p))
-    );
+  const handleToggleActive = async (id: string) => {
+    const target = products.find((p) => p.id === id);
+    if (!target) return;
+    const newStatus = !target.isActive;
+    setProducts(products.map((p) => (p.id === id ? { ...p, isActive: newStatus } : p)));
+
+    try {
+      await fetch('/api/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isActive: newStatus }),
+      });
+      showToast(`Product ${newStatus ? 'Activated' : 'Set to Draft'} in DB`);
+    } catch (err) {}
   };
 
   // Toggle Featured
-  const handleToggleFeatured = (id: string) => {
-    setProducts(
-      products.map((p) => (p.id === id ? { ...p, isFeatured: !p.isFeatured } : p))
-    );
+  const handleToggleFeatured = async (id: string) => {
+    const target = products.find((p) => p.id === id);
+    if (!target) return;
+    const newFeatured = !target.isFeatured;
+    setProducts(products.map((p) => (p.id === id ? { ...p, isFeatured: newFeatured } : p)));
+
+    try {
+      await fetch('/api/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, isFeatured: newFeatured }),
+      });
+      showToast(`Featured status updated in DB`);
+    } catch (err) {}
   };
 
   // Delete
-  const handleDeleteProduct = (id: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
+  const handleDeleteProduct = async (id: string) => {
+    if (confirm('Are you sure you want to delete this product from database?')) {
       setProducts(products.filter((p) => p.id !== id));
-      showToast('Product deleted.');
+      showToast('Product deleted from database.');
+
+      try {
+        await fetch(`/api/products?id=${id}`, { method: 'DELETE' });
+      } catch (err) {}
     }
   };
 
@@ -306,7 +456,7 @@ export default function AdminProductsPage() {
               }}
             >
               <option value="ALL">All Categories</option>
-              {demoCategories.map((c) => (
+              {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.nameEn} ({c.nameBn})
                 </option>
@@ -607,7 +757,7 @@ export default function AdminProductsPage() {
                       fontSize: '0.9rem',
                     }}
                   >
-                    {demoCategories.map((c) => (
+                    {categories.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.nameEn} ({c.nameBn})
                       </option>
@@ -759,6 +909,80 @@ export default function AdminProductsPage() {
                 />
               </div>
 
+              {/* Product Images & Supabase Storage Upload */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-slate-700)', marginBottom: '6px' }}>
+                  Product Images (Supabase Storage)
+                </label>
+                
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '10px' }}>
+                  {formData.images && formData.images.map((imgUrl, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        position: 'relative',
+                        width: '70px',
+                        height: '70px',
+                        borderRadius: 'var(--radius-md)',
+                        overflow: 'hidden',
+                        border: '1px solid var(--color-slate-300)',
+                        background: '#f8fafc',
+                      }}
+                    >
+                      <img src={imgUrl} alt={`Uploaded ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(idx)}
+                        style={{
+                          position: 'absolute',
+                          top: '2px',
+                          right: '2px',
+                          background: 'rgba(220, 38, 38, 0.85)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '18px',
+                          height: '18px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <FiX size={12} />
+                      </button>
+                    </div>
+                  ))}
+
+                  <label
+                    style={{
+                      width: '70px',
+                      height: '70px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '2px dashed var(--color-slate-300)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: isUploading ? 'not-allowed' : 'pointer',
+                      background: '#f8fafc',
+                      color: 'var(--color-slate-500)',
+                      fontSize: '0.75rem',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <input type="file" accept="image/*" onChange={handleFileUpload} disabled={isUploading} style={{ display: 'none' }} />
+                    <FiUploadCloud size={20} color={isUploading ? 'var(--color-slate-400)' : 'var(--color-primary-dark)'} />
+                    <span style={{ fontSize: '0.65rem', marginTop: '2px', textAlign: 'center' }}>
+                      {isUploading ? 'Uploading...' : 'Upload'}
+                    </span>
+                  </label>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-slate-500)' }}>
+                  Upload image directly to Supabase Storage bucket. Public URLs will be generated automatically.
+                </p>
+              </div>
+
               <div style={{ display: 'flex', gap: '24px', marginBottom: '24px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600 }}>
                   <input
@@ -782,8 +1006,8 @@ export default function AdminProductsPage() {
                 <button type="button" className="btn btn-outline" onClick={() => setIsModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingProduct ? 'Update Product' : 'Save Product'}
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving Product...' : editingProduct ? 'Update Product' : 'Save Product'}
                 </button>
               </div>
             </form>

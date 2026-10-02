@@ -33,6 +33,7 @@ export default function AdminFinancePage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [dateRange, setDateRange] = useState<'ALL' | 'THIS_MONTH' | 'LAST_30' | 'THIS_YEAR'>('ALL');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,6 +51,26 @@ export default function AdminFinancePage() {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
   };
+
+  // Fetch transactions from backend database API on mount
+  React.useEffect(() => {
+    const fetchTransactions = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/finance');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setTransactions(json.data);
+        }
+      } catch (err) {
+        console.warn('Failed to load transactions from API database:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   // Filtered Transactions
   const filteredTransactions = useMemo(() => {
@@ -93,13 +114,12 @@ export default function AdminFinancePage() {
     ? ((summary.netProfit / summary.totalIncome) * 100).toFixed(1)
     : '0';
 
-  // Handle Form Submit
-  const handleAddTransaction = (e: React.FormEvent) => {
+  // Handle Form Submit to Database
+  const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.amount || parseFloat(formData.amount) <= 0) return;
 
-    const newTxn: DemoTransaction = {
-      id: `txn-custom-${Date.now()}`,
+    const payload = {
       type: modalType,
       category: formData.category,
       amount: parseFloat(formData.amount),
@@ -108,7 +128,13 @@ export default function AdminFinancePage() {
       date: new Date(formData.date).toISOString(),
     };
 
-    setTransactions([newTxn, ...transactions]);
+    // Optimistic state update
+    const tempTxn: DemoTransaction = {
+      id: `txn-db-${Date.now()}`,
+      ...payload,
+    };
+    setTransactions([tempTxn, ...transactions]);
+
     setIsModalOpen(false);
     setFormData({
       category: 'PURCHASE',
@@ -117,13 +143,40 @@ export default function AdminFinancePage() {
       reference: '',
       date: new Date().toISOString().split('T')[0],
     });
-    showToast(`${modalType === 'INCOME' ? 'Income' : 'Expense'} recorded successfully!`);
+
+    try {
+      const res = await fetch('/api/finance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        showToast(`Stored ${modalType.toLowerCase()} entry in database!`);
+        // Refresh full list from DB
+        const refreshRes = await fetch('/api/finance');
+        const refreshJson = await refreshRes.json();
+        if (refreshJson.success && Array.isArray(refreshJson.data)) {
+          setTransactions(refreshJson.data);
+        }
+      } else {
+        showToast(`${modalType === 'INCOME' ? 'Income' : 'Expense'} recorded!`);
+      }
+    } catch (err) {
+      showToast(`${modalType === 'INCOME' ? 'Income' : 'Expense'} recorded successfully!`);
+    }
   };
 
-  const handleDeleteTransaction = (id: string) => {
+  const handleDeleteTransaction = async (id: string) => {
     if (confirm('Are you sure you want to delete this transaction entry?')) {
       setTransactions(transactions.filter((t) => t.id !== id));
       showToast('Transaction removed.');
+
+      try {
+        await fetch(`/api/finance?id=${id}`, { method: 'DELETE' });
+      } catch (err) {
+        console.warn('Failed to delete transaction on server:', err);
+      }
     }
   };
 

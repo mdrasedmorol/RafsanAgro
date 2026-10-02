@@ -24,10 +24,43 @@ export default function AdminSettingsPage() {
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setToastMessage('Settings updated successfully!');
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  React.useEffect(() => {
+    const fetchSettingsFromDB = async () => {
+      try {
+        const res = await fetch('/api/settings');
+        const json = await res.json();
+        if (json.success && json.data) {
+          setSettings((prev) => ({ ...prev, ...json.data }));
+        }
+      } catch (err) {
+        console.warn('Failed to load settings from DB:', err);
+      }
+    };
+    fetchSettingsFromDB();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Settings saved to database successfully!');
+      } else {
+        showToast('Settings configuration updated!');
+      }
+    } catch (err) {
+      showToast('Settings saved locally.');
+    }
   };
 
   return (

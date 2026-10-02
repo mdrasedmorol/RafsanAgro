@@ -5,6 +5,15 @@ export const metadata: Metadata = {
   title: "Rafsan Agro — Premium Agricultural Products",
   description:
     "Rafsan Agro is your trusted source for premium agricultural products including seeds, fertilizers, pesticides, and farm tools. Quality products for better farming in Bangladesh.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/icon.png',
+  },
   keywords: [
     "agricultural products",
     "seeds",

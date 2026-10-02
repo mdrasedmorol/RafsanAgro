@@ -11,13 +11,36 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const categoryFilter = searchParams.get('category');
 
+  const [productsList, setProductsList] = useState<any[]>(demoProducts);
+  const [categoriesList, setCategoriesList] = useState<any[]>(demoCategories);
+
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(categoryFilter || '');
   const [sortBy, setSortBy] = useState('newest');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
 
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          fetch('/api/products'),
+          fetch('/api/categories'),
+        ]);
+        const prodData = await prodRes.json();
+        const catData = await catRes.json();
+        if (prodData.success && Array.isArray(prodData.data) && prodData.data.length > 0) {
+          setProductsList(prodData.data);
+        }
+        if (catData.success && Array.isArray(catData.data) && catData.data.length > 0) {
+          setCategoriesList(catData.data);
+        }
+      } catch (err) {}
+    };
+    fetchData();
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    let products = demoProducts.filter((p) => p.isActive);
+    let products = productsList.filter((p) => p.isActive);
 
     // Search
     if (search) {
@@ -26,13 +49,13 @@ function ProductsContent() {
         (p) =>
           p.nameEn.toLowerCase().includes(q) ||
           p.nameBn.includes(search) ||
-          p.tags.some((tag) => tag.includes(q))
+          (p.tags && p.tags.some((tag: string) => tag.includes(q)))
       );
     }
 
     // Category
     if (selectedCategory) {
-      products = products.filter((p) => p.categorySlug === selectedCategory);
+      products = products.filter((p) => p.categorySlug === selectedCategory || p.categoryId === selectedCategory);
     }
 
     // Price
@@ -57,7 +80,7 @@ function ProductsContent() {
     }
 
     return products;
-  }, [search, selectedCategory, sortBy, priceRange]);
+  }, [productsList, search, selectedCategory, sortBy, priceRange]);
 
   return (
     <div className="page-enter" style={{ minHeight: '80vh' }}>
@@ -105,8 +128,8 @@ function ProductsContent() {
             id="category-filter"
           >
             <option value="">{lang === 'bn' ? 'সব ক্যাটাগরি' : 'All Categories'}</option>
-            {demoCategories.map((cat) => (
-              <option key={cat.id} value={cat.slug}>
+            {categoriesList.map((cat) => (
+              <option key={cat.id} value={cat.slug || cat.id}>
                 {lang === 'bn' ? cat.nameBn : cat.nameEn}
               </option>
             ))}
@@ -157,14 +180,14 @@ function ProductsContent() {
           >
             {lang === 'bn' ? 'সব' : 'All'}
           </button>
-          {demoCategories.map((cat) => (
+          {categoriesList.map((cat) => (
             <button
               key={cat.id}
-              className={`btn ${selectedCategory === cat.slug ? 'btn-primary' : 'btn-secondary'}`}
+              className={`btn ${selectedCategory === (cat.slug || cat.id) ? 'btn-primary' : 'btn-secondary'}`}
               style={{ borderRadius: 'var(--radius-full)' }}
-              onClick={() => setSelectedCategory(cat.slug)}
+              onClick={() => setSelectedCategory(cat.slug || cat.id)}
             >
-              {cat.icon} {lang === 'bn' ? cat.nameBn : cat.nameEn}
+              {cat.icon || '🌱'} {lang === 'bn' ? cat.nameBn : cat.nameEn}
             </button>
           ))}
         </div>

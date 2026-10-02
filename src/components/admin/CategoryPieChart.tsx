@@ -20,7 +20,7 @@ interface CategoryPieChartProps {
 
 const COLORS = ['#ef4444', '#8b5cf6', '#f59e0b', '#06b6d4', '#10b981', '#ec4899', '#6366f1', '#64748b'];
 
-export default function CategoryPieChart({ transactions, height = 300 }: CategoryPieChartProps) {
+export default function CategoryPieChart({ transactions, height = 280 }: CategoryPieChartProps) {
   const data = getExpenseByCategory(transactions);
 
   const chartData = data.map((item) => {
@@ -34,14 +34,14 @@ export default function CategoryPieChart({ transactions, height = 300 }: Categor
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <PieChart>
+      <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
         <Pie
           data={chartData}
           cx="50%"
-          cy="50%"
-          innerRadius={60}
-          outerRadius={100}
-          paddingAngle={3}
+          cy="45%"
+          innerRadius={55}
+          outerRadius={85}
+          paddingAngle={4}
           dataKey="value"
           stroke="none"
         >
@@ -51,20 +51,22 @@ export default function CategoryPieChart({ transactions, height = 300 }: Categor
         </Pie>
         <Tooltip
           contentStyle={{
-            background: 'white',
+            background: '#ffffff',
             border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            fontSize: '13px',
+            borderRadius: '10px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            fontSize: '12px',
+            padding: '8px 12px',
           }}
           formatter={(value: number) => [`৳${value.toLocaleString()}`, '']}
         />
         <Legend
-          wrapperStyle={{ fontSize: '12px' }}
+          wrapperStyle={{ fontSize: '11.5px', paddingTop: '4px' }}
           iconType="circle"
-          iconSize={8}
+          iconSize={7}
         />
       </PieChart>
     </ResponsiveContainer>
   );
 }
+

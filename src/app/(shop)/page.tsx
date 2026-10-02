@@ -5,12 +5,34 @@ import Link from 'next/link';
 import { useI18n } from '@/lib/i18n';
 import { demoProducts, demoCategories } from '@/lib/demo-data';
 import ProductCard from '@/components/shop/ProductCard';
-import HeroPlant from '@/components/shop/HeroPlant';
 
 export default function HomePage() {
   const { t, lang } = useI18n();
-  const featuredProducts = demoProducts.filter((p) => p.isFeatured);
-  const allProducts = demoProducts.filter((p) => p.isActive);
+  const [categories, setCategories] = React.useState<any[]>(demoCategories);
+  const [productsList, setProductsList] = React.useState<any[]>(demoProducts);
+
+  React.useEffect(() => {
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setCategories(json.data);
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setProductsList(json.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const featuredProducts = productsList.filter((p) => p.isFeatured);
+  const allProducts = productsList.filter((p) => p.isActive);
 
   return (
     <div className="page-enter">
@@ -81,9 +103,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
-        {/* Interactive plant — leaves sway with cursor */}
-        <HeroPlant />
       </section>
 
       {/* Categories Section */}
@@ -100,21 +119,27 @@ export default function HomePage() {
               {t.common.viewAll} →
             </Link>
           </div>
-          <div className="category-grid">
-            {demoCategories.map((cat) => (
-              <Link href={`/products?category=${cat.slug}`} key={cat.id}>
-                <div className="category-card" id={`cat-${cat.slug}`}>
-                  <span className="category-card-icon">{cat.icon}</span>
-                  <h3 className="category-card-name">
-                    {lang === 'bn' ? cat.nameBn : cat.nameEn}
-                  </h3>
-                  <span className="category-card-count">
-                    {cat.productCount} {lang === 'bn' ? 'টি পণ্য' : 'products'}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {categories.length > 0 ? (
+            <div className="category-grid">
+              {categories.map((cat) => (
+                <Link href={`/products?category=${cat.slug}`} key={cat.id}>
+                  <div className="category-card" id={`cat-${cat.slug}`}>
+                    <span className="category-card-icon">{cat.icon}</span>
+                    <h3 className="category-card-name">
+                      {lang === 'bn' ? cat.nameBn : cat.nameEn}
+                    </h3>
+                    <span className="category-card-count">
+                      {cat.productCount} {lang === 'bn' ? 'টি পণ্য' : 'products'}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-tertiary)' }}>
+              {lang === 'bn' ? 'কোনো ক্যাটাগরি পাওয়া যায়নি।' : 'No categories available yet.'}
+            </div>
+          )}
         </div>
       </section>
 
@@ -132,11 +157,17 @@ export default function HomePage() {
               {t.common.viewAll} →
             </Link>
           </div>
-          <div className="grid-products">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {featuredProducts.length > 0 ? (
+            <div className="grid-products">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-tertiary)' }}>
+              {lang === 'bn' ? 'কোনো ফিচার্ড পণ্য পাওয়া যায়নি।' : 'No featured products yet.'}
+            </div>
+          )}
         </div>
       </section>
 
@@ -151,11 +182,17 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <div className="grid-products">
-            {allProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {allProducts.length > 0 ? (
+            <div className="grid-products">
+              {allProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-tertiary)' }}>
+              {lang === 'bn' ? 'কোনো পণ্য পাওয়া যায়নি।' : 'No products available yet.'}
+            </div>
+          )}
         </div>
       </section>
 

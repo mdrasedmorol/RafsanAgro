@@ -16,8 +16,21 @@ export default function ProductDetailPage() {
   const addItem = useCartStore((s) => s.addItem);
   const openCart = useCartStore((s) => s.openCart);
 
-  const product = demoProducts.find((p) => p.slug === slug);
+  const [allProducts, setAllProducts] = useState<any[]>(demoProducts);
   const [quantity, setQuantity] = useState(1);
+
+  React.useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setAllProducts(json.data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const product = allProducts.find((p) => p.slug === slug || p.id === slug);
 
   if (!product) {
     return (
@@ -39,8 +52,8 @@ export default function ProductDetailPage() {
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const discountPercent = hasDiscount ? calcDiscountPercent(product.price, product.discountPrice!) : 0;
 
-  const relatedProducts = demoProducts
-    .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
+  const relatedProducts = allProducts
+    .filter((p) => (p.categoryId === product.categoryId || p.categorySlug === product.categorySlug) && p.id !== product.id)
     .slice(0, 4);
 
   const handleAddToCart = () => {
@@ -59,14 +72,18 @@ export default function ProductDetailPage() {
     openCart();
   };
 
-  const categoryIcon = {
+  const categoryIconMap: Record<string, string> = {
     seeds: '🌱',
+    seed: '🌱',
+    trees: '🌳',
+    tree: '🌳',
     fertilizers: '🧪',
     pesticides: '🛡️',
     'farm-tools': '🔧',
     irrigation: '💧',
     'animal-feed': '🐄',
-  }[product.categorySlug] || '📦';
+  };
+  const categoryIcon = categoryIconMap[product.categorySlug] || product.icon || '📦';
 
   return (
     <div className="page-enter">
@@ -84,11 +101,17 @@ export default function ProductDetailPage() {
       <div className="container product-page">
         <div className="product-detail">
           {/* Gallery */}
-          <div className="product-gallery">
-            <div className="product-main-image">
-              <span>{categoryIcon}</span>
+            <div className="product-main-image" style={{ overflow: 'hidden' }}>
+              {product.images && product.images[0] && (product.images[0].startsWith('http') || product.images[0].startsWith('/images/products/')) ? (
+                <img
+                  src={product.images[0]}
+                  alt={name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <span>{categoryIcon}</span>
+              )}
             </div>
-          </div>
 
           {/* Info */}
           <div className="product-info">

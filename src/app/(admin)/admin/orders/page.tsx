@@ -32,6 +32,22 @@ export default function AdminOrdersPage() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const fetchOrdersFromDB = async () => {
+    try {
+      const res = await fetch('/api/orders');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setOrders(json.data);
+      }
+    } catch (err) {
+      console.warn('Failed to load orders from DB:', err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchOrdersFromDB();
+  }, []);
+
   // Filtered Orders
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
@@ -54,15 +70,24 @@ export default function AdminOrdersPage() {
   const shippedCount = orders.filter((o) => o.status === 'SHIPPED').length;
   const deliveredCount = orders.filter((o) => o.status === 'DELIVERED').length;
 
-  // Change Status
-  const handleUpdateStatus = (orderId: string, newStatus: string) => {
+  // Change Status in Database
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
     setOrders(
       orders.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
     );
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
     }
-    showToast(`Order #${orderId} status updated to ${newStatus}`);
+    showToast(`Order status updated to ${newStatus}`);
+
+    try {
+      await fetch('/api/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: orderId, status: newStatus }),
+      });
+      showToast(`Order status saved to database!`);
+    } catch (err) {}
   };
 
   const getStatusBadge = (status: string) => {
