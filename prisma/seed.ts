@@ -5,6 +5,22 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting Database Seeding for Rafsan Agro...');
 
+  // Seed Admin User
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'mdrasedmorol@gmail.com' },
+    update: {
+      password: 'Rashed123@',
+    },
+    create: {
+      id: 'admin-usr-01',
+      name: 'Rashed Morol',
+      email: 'mdrasedmorol@gmail.com',
+      password: 'Rashed123@',
+      role: 'SUPER_ADMIN',
+    },
+  });
+  console.log('✅ Admin User created/updated (Mdrasedmorol@gmail.com).');
+
   // Seed Default Categories
   const catRice = await prisma.category.upsert({
     where: { slug: 'seeds' },

@@ -9,7 +9,7 @@ import {
   getMonthlyData,
   DemoTransaction,
 } from '@/lib/demo-data';
-import { formatCurrency, formatDate, EXPENSE_CATEGORIES } from '@/lib/utils';
+import { formatCurrency, formatDate, EXPENSE_CATEGORIES, formatCategoryName } from '@/lib/utils';
 import {
   FiTrendingUp,
   FiTrendingDown,
@@ -40,6 +40,7 @@ export default function AdminFinancePage() {
   const [modalType, setModalType] = useState<'INCOME' | 'EXPENSE'>('EXPENSE');
   const [formData, setFormData] = useState({
     category: 'PURCHASE',
+    customCategory: '',
     amount: '',
     description: '',
     reference: '',
@@ -78,7 +79,15 @@ export default function AdminFinancePage() {
       // Type Filter
       if (typeFilter !== 'ALL' && t.type !== typeFilter) return false;
       // Category Filter
-      if (categoryFilter !== 'ALL' && t.category !== categoryFilter) return false;
+      if (categoryFilter !== 'ALL') {
+        if (categoryFilter === 'OTHER' || categoryFilter === 'OTHER_INCOME') {
+          if (t.category !== 'OTHER' && t.category !== 'OTHER_INCOME' && !t.category.startsWith('OTHER') && ['SALE', 'SERVICE', 'PURCHASE', 'SALARY', 'RENT', 'TRANSPORT', 'UTILITY', 'MARKETING', 'EQUIPMENT'].includes(t.category)) {
+            return false;
+          }
+        } else if (t.category !== categoryFilter) {
+          return false;
+        }
+      }
       // Search
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
@@ -103,7 +112,7 @@ export default function AdminFinancePage() {
         }
       }
       return true;
-    });
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, typeFilter, categoryFilter, searchQuery, dateRange]);
 
   // Financial Summaries
@@ -119,9 +128,14 @@ export default function AdminFinancePage() {
     e.preventDefault();
     if (!formData.amount || parseFloat(formData.amount) <= 0) return;
 
+    const isOtherCategory = formData.category === 'OTHER' || formData.category === 'OTHER_INCOME';
+    const finalCategory = isOtherCategory && formData.customCategory.trim()
+      ? `OTHER: ${formData.customCategory.trim()}`
+      : formData.category;
+
     const payload = {
       type: modalType,
-      category: formData.category,
+      category: finalCategory,
       amount: parseFloat(formData.amount),
       description: formData.description || `${modalType === 'INCOME' ? 'Income' : 'Expense'} entry`,
       reference: formData.reference || undefined,
@@ -138,6 +152,7 @@ export default function AdminFinancePage() {
     setIsModalOpen(false);
     setFormData({
       category: 'PURCHASE',
+      customCategory: '',
       amount: '',
       description: '',
       reference: '',
@@ -241,7 +256,7 @@ export default function AdminFinancePage() {
           </button>
           <button
             className="btn"
-            style={{ background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}
+            style={{ background: '#4BA625', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}
             onClick={() => {
               setModalType('INCOME');
               setFormData((prev) => ({ ...prev, category: 'SALE' }));
@@ -266,10 +281,10 @@ export default function AdminFinancePage() {
 
       {/* KPI Cards */}
       <div className="kpi-grid" style={{ marginBottom: '28px' }}>
-        <div className="kpi-card" style={{ borderLeft: '4px solid #059669' }}>
+        <div className="kpi-card" style={{ borderLeft: '4px solid #4BA625' }}>
           <div className="kpi-card-header">
             <span className="kpi-card-title">Total Revenue / Income</span>
-            <div className="kpi-card-icon" style={{ background: '#d1fae5', color: '#059669' }}>
+            <div className="kpi-card-icon" style={{ background: '#d1fae5', color: '#4BA625' }}>
               <FiTrendingUp size={22} />
             </div>
           </div>
@@ -295,11 +310,11 @@ export default function AdminFinancePage() {
         <div className="kpi-card" style={{ borderLeft: `4px solid ${summary.netProfit >= 0 ? '#10b981' : '#f59e0b'}` }}>
           <div className="kpi-card-header">
             <span className="kpi-card-title">Net Profit / Loss</span>
-            <div className="kpi-card-icon" style={{ background: '#ecfdf5', color: '#059669' }}>
+            <div className="kpi-card-icon" style={{ background: '#ecfdf5', color: '#4BA625' }}>
               <FiDollarSign size={22} />
             </div>
           </div>
-          <div className="kpi-card-value" style={{ color: summary.netProfit >= 0 ? '#059669' : '#dc2626' }}>
+          <div className="kpi-card-value" style={{ color: summary.netProfit >= 0 ? '#4BA625' : '#dc2626' }}>
             {formatCurrency(summary.netProfit)}
           </div>
           <div className={`kpi-card-trend ${summary.netProfit >= 0 ? 'kpi-trend-up' : 'kpi-trend-down'}`}>
@@ -423,15 +438,18 @@ export default function AdminFinancePage() {
                   background: '#fff',
                 }}
               >
-                <option value="ALL">All Categories</option>
-                <option value="SALE">SALE (Sales Income)</option>
-                <option value="PURCHASE">PURCHASE (Inventory/Stock)</option>
-                <option value="SALARY">SALARY (Staff)</option>
-                <option value="RENT">RENT (Shop/Land)</option>
-                <option value="TRANSPORT">TRANSPORT (Delivery)</option>
-                <option value="UTILITY">UTILITY (Bills)</option>
-                <option value="MARKETING">MARKETING (Ads)</option>
-                <option value="OTHER">OTHER</option>
+                <option value="ALL">All Categories - সকল ক্যাটাগরি</option>
+                <option value="SALE">Product Sales - পণ্য বিক্রয়</option>
+                <option value="SERVICE">Services & Consulting - সেবা ও পরামর্শ</option>
+                <option value="OTHER_INCOME">Other Income - অন্যান্য আয়</option>
+                <option value="PURCHASE">Inventory Purchase - পণ্য ক্রয়</option>
+                <option value="SALARY">Salary & Wages - কর্মী বেতন</option>
+                <option value="RENT">Shop & Land Rent - দোকান ও জমি ভাড়া</option>
+                <option value="TRANSPORT">Transport & Freight - পরিবহন খরচ</option>
+                <option value="UTILITY">Utility Bills - ইউটিলিটি বিল</option>
+                <option value="MARKETING">Marketing & Ads - বিজ্ঞাপন ও প্রচার</option>
+                <option value="EQUIPMENT">Machinery & Equipment - যন্ত্রপাতি ও সরঞ্জাম</option>
+                <option value="OTHER">Other Expense - অন্যান্য ব্যয়</option>
               </select>
             </div>
 
@@ -505,7 +523,7 @@ export default function AdminFinancePage() {
                         </span>
                       </td>
                       <td>
-                        <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{txn.category}</span>
+                        <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{formatCategoryName(txn.category)}</span>
                       </td>
                       <td style={{ fontSize: '0.875rem', color: 'var(--color-slate-800)', maxWidth: '280px' }}>
                         {txn.description}
@@ -518,7 +536,7 @@ export default function AdminFinancePage() {
                           textAlign: 'right',
                           fontWeight: 700,
                           fontSize: '0.95rem',
-                          color: isInc ? '#059669' : '#dc2626',
+                          color: isInc ? '#4BA625' : '#dc2626',
                           whiteSpace: 'nowrap',
                         }}
                       >
@@ -582,7 +600,7 @@ export default function AdminFinancePage() {
             <div
               style={{
                 padding: '20px 24px',
-                background: modalType === 'INCOME' ? '#059669' : '#dc2626',
+                background: modalType === 'INCOME' ? '#4BA625' : '#dc2626',
                 color: '#fff',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -609,9 +627,9 @@ export default function AdminFinancePage() {
                     flex: 1,
                     padding: '10px',
                     borderRadius: 'var(--radius-md)',
-                    border: '2px solid #059669',
-                    background: modalType === 'INCOME' ? '#059669' : '#fff',
-                    color: modalType === 'INCOME' ? '#fff' : '#059669',
+                    border: '2px solid #4BA625',
+                    background: modalType === 'INCOME' ? '#4BA625' : '#fff',
+                    color: modalType === 'INCOME' ? '#fff' : '#4BA625',
                     fontWeight: 700,
                     cursor: 'pointer',
                   }}
@@ -661,23 +679,45 @@ export default function AdminFinancePage() {
                 >
                   {modalType === 'INCOME' ? (
                     <>
-                      <option value="SALE">SALE (Product Sales)</option>
-                      <option value="SERVICE">SERVICE (Consulting/Services)</option>
-                      <option value="OTHER_INCOME">OTHER INCOME</option>
+                      <option value="SALE">Product Sales - পণ্য বিক্রয়</option>
+                      <option value="SERVICE">Services & Consulting - সেবা ও পরামর্শ</option>
+                      <option value="OTHER_INCOME">Others / Other Income - অন্যান্য আয়</option>
                     </>
                   ) : (
                     <>
-                      <option value="PURCHASE">PURCHASE (Inventory / Stock)</option>
-                      <option value="SALARY">SALARY (Staff Wages)</option>
-                      <option value="RENT">RENT (Land/Shop)</option>
-                      <option value="TRANSPORT">TRANSPORT (Logistics/Delivery)</option>
-                      <option value="UTILITY">UTILITY (Electricity/Water)</option>
-                      <option value="MARKETING">MARKETING (Promotions/Ads)</option>
-                      <option value="EQUIPMENT">EQUIPMENT (Machinery/Tools)</option>
-                      <option value="OTHER">OTHER EXPENSE</option>
+                      <option value="PURCHASE">Inventory Purchase - পণ্য ক্রয়</option>
+                      <option value="SALARY">Salary & Wages - কর্মী বেতন</option>
+                      <option value="RENT">Shop & Land Rent - দোকান ও জমি ভাড়া</option>
+                      <option value="TRANSPORT">Transport & Freight - পরিবহন খরচ</option>
+                      <option value="UTILITY">Utility Bills - ইউটিলিটি বিল</option>
+                      <option value="MARKETING">Marketing & Ads - বিজ্ঞাপন ও প্রচার</option>
+                      <option value="EQUIPMENT">Machinery & Equipment - যন্ত্রপাতি ও সরঞ্জাম</option>
+                      <option value="OTHER">Others / Other Expense - অন্যান্য ব্যয়</option>
                     </>
                   )}
                 </select>
+
+                {(formData.category === 'OTHER' || formData.category === 'OTHER_INCOME') && (
+                  <div style={{ marginTop: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-slate-700)', marginBottom: '6px' }}>
+                      Specific Category Name / নির্দিষ্ট ক্যাটাগরির নাম *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter specific category name (e.g. Seed Sales, Custom Freight)..."
+                      value={formData.customCategory}
+                      onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--color-slate-300)',
+                        fontSize: '0.9rem',
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div style={{ marginBottom: '16px' }}>
@@ -772,7 +812,7 @@ export default function AdminFinancePage() {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  style={{ background: modalType === 'INCOME' ? '#059669' : '#dc2626' }}
+                  style={{ background: modalType === 'INCOME' ? '#4BA625' : '#dc2626' }}
                 >
                   Save Entry
                 </button>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiTrendingUp, FiPlus, FiSearch, FiDownload, FiTrash2, FiCheckCircle } from 'react-icons/fi';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, formatCategoryName } from '@/lib/utils';
 import type { DemoTransaction } from '@/lib/demo-data';
 
 export default function FinanceIncomePage() {
@@ -12,6 +12,7 @@ export default function FinanceIncomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     category: 'SALE',
+    customCategory: '',
     amount: '',
     description: '',
     reference: '',
@@ -43,7 +44,15 @@ export default function FinanceIncomePage() {
   const incomeTransactions = useMemo(() => {
     return transactions.filter((t) => {
       if (t.type !== 'INCOME') return false;
-      if (categoryFilter !== 'ALL' && t.category !== categoryFilter) return false;
+      if (categoryFilter !== 'ALL') {
+        if (categoryFilter === 'OTHER' || categoryFilter === 'OTHER_INCOME') {
+          if (t.category !== 'OTHER' && t.category !== 'OTHER_INCOME' && !t.category.startsWith('OTHER') && ['SALE', 'SERVICE'].includes(t.category)) {
+            return false;
+          }
+        } else if (t.category !== categoryFilter) {
+          return false;
+        }
+      }
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         return (
@@ -53,7 +62,7 @@ export default function FinanceIncomePage() {
         );
       }
       return true;
-    });
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, categoryFilter, searchQuery]);
 
   const totalIncome = useMemo(() => {
@@ -64,9 +73,14 @@ export default function FinanceIncomePage() {
     e.preventDefault();
     if (!formData.amount || parseFloat(formData.amount) <= 0) return;
 
+    const isOther = formData.category === 'OTHER' || formData.category === 'OTHER_INCOME';
+    const finalCategory = isOther && formData.customCategory.trim()
+      ? `OTHER_INCOME: ${formData.customCategory.trim()}`
+      : formData.category;
+
     const payload = {
       type: 'INCOME',
-      category: formData.category,
+      category: finalCategory,
       amount: parseFloat(formData.amount),
       description: formData.description || 'Income entry',
       reference: formData.reference || undefined,
@@ -90,6 +104,7 @@ export default function FinanceIncomePage() {
       setIsModalOpen(false);
       setFormData({
         category: 'SALE',
+        customCategory: '',
         amount: '',
         description: '',
         reference: '',
@@ -115,7 +130,7 @@ export default function FinanceIncomePage() {
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          background: '#059669',
+          background: '#4BA625',
           color: '#fff',
           padding: '12px 24px',
           borderRadius: 'var(--radius-lg)',
@@ -176,10 +191,10 @@ export default function FinanceIncomePage() {
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
-            <option value="ALL">All Categories</option>
-            <option value="SALE">Product Sales</option>
-            <option value="SERVICE">Services / Consulting</option>
-            <option value="OTHER_INCOME">Other Income</option>
+            <option value="ALL">All Categories - সকল ক্যাটাগরি</option>
+            <option value="SALE">Product Sales - পণ্য বিক্রয়</option>
+            <option value="SERVICE">Services & Consulting - সেবা ও পরামর্শ</option>
+            <option value="OTHER_INCOME">Other Income - অন্যান্য আয়</option>
           </select>
         </div>
 
@@ -206,10 +221,10 @@ export default function FinanceIncomePage() {
                 incomeTransactions.map((t) => (
                   <tr key={t.id}>
                     <td>{formatDate(t.date)}</td>
-                    <td><span className="table-font-bold">{t.category}</span></td>
+                    <td><span className="table-font-bold">{formatCategoryName(t.category)}</span></td>
                     <td>{t.description}</td>
                     <td><span style={{ fontFamily: 'monospace' }}>{t.reference || '—'}</span></td>
-                    <td style={{ textAlign: 'right', fontWeight: 700, color: '#059669' }}>
+                    <td style={{ textAlign: 'right', fontWeight: 700, color: '#4BA625' }}>
                       +{formatCurrency(t.amount)}
                     </td>
                     <td style={{ textAlign: 'center' }}>
@@ -233,10 +248,27 @@ export default function FinanceIncomePage() {
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Category</label>
                 <select className="select" style={{ width: '100%' }} value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
-                  <option value="SALE">SALE (Product Sales)</option>
-                  <option value="SERVICE">SERVICE (Consulting/Services)</option>
-                  <option value="OTHER_INCOME">OTHER INCOME</option>
+                  <option value="SALE">Product Sales - পণ্য বিক্রয়</option>
+                  <option value="SERVICE">Services & Consulting - সেবা ও পরামর্শ</option>
+                  <option value="OTHER_INCOME">Others / Other Income - অন্যান্য আয়</option>
                 </select>
+
+                {(formData.category === 'OTHER' || formData.category === 'OTHER_INCOME') && (
+                  <div style={{ marginTop: '10px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>
+                      Specific Category Name / নির্দিষ্ট ক্যাটাগরির নাম *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="input"
+                      style={{ width: '100%' }}
+                      placeholder="Enter specific category name (e.g. VIP Customer, Organic Waste)..."
+                      value={formData.customCategory}
+                      onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                    />
+                  </div>
+                )}
               </div>
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Amount (BDT ৳) *</label>

@@ -83,15 +83,15 @@ export function getFinanceSummary(transactions: DemoTransaction[], period?: { st
       return d >= period.start && d <= period.end;
     });
   }
-  
+
   const totalIncome = filtered
     .filter(t => t.type === 'INCOME')
     .reduce((sum, t) => sum + t.amount, 0);
-  
+
   const totalExpense = filtered
     .filter(t => t.type === 'EXPENSE')
     .reduce((sum, t) => sum + t.amount, 0);
-  
+
   return {
     totalIncome,
     totalExpense,
@@ -102,23 +102,23 @@ export function getFinanceSummary(transactions: DemoTransaction[], period?: { st
 
 export function getMonthlyData(transactions: DemoTransaction[]) {
   const monthlyMap: Record<string, { income: number; expense: number; month: string }> = {};
-  
+
   transactions.forEach(t => {
     const d = new Date(t.date);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const monthName = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-    
+
     if (!monthlyMap[key]) {
       monthlyMap[key] = { income: 0, expense: 0, month: monthName };
     }
-    
+
     if (t.type === 'INCOME') {
       monthlyMap[key].income += t.amount;
     } else {
       monthlyMap[key].expense += t.amount;
     }
   });
-  
+
   return Object.entries(monthlyMap)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, v]) => ({ ...v, profit: v.income - v.expense }));
@@ -126,12 +126,12 @@ export function getMonthlyData(transactions: DemoTransaction[]) {
 
 export function getExpenseByCategory(transactions: DemoTransaction[]) {
   const categoryMap: Record<string, number> = {};
-  
+
   transactions
     .filter(t => t.type === 'EXPENSE')
     .forEach(t => {
       categoryMap[t.category] = (categoryMap[t.category] || 0) + t.amount;
     });
-  
+
   return Object.entries(categoryMap).map(([name, value]) => ({ name, value }));
 }

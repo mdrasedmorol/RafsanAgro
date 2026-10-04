@@ -34,7 +34,7 @@ export default function AdminDashboard() {
           setProducts(json.data);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const lowStockProducts = products.filter((p) => p.stock < 30);
@@ -48,11 +48,8 @@ export default function AdminDashboard() {
           <p className="admin-page-header-subtitle">Welcome back! Here&apos;s your business overview.</p>
         </div>
         <div className="admin-page-actions">
-          <Link href="/admin/finance/income" className="btn btn-primary">
-            <FiPlus size={16} /> Add Income
-          </Link>
-          <Link href="/admin/finance/expenses" className="btn btn-secondary">
-            <FiPlus size={16} /> Add Expense
+          <Link href="/admin/finance" className="btn btn-primary">
+            <FiDollarSign size={16} /> Finance Tracker
           </Link>
         </div>
       </div>

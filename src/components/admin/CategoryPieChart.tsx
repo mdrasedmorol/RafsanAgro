@@ -25,8 +25,9 @@ export default function CategoryPieChart({ transactions, height = 280 }: Categor
 
   const chartData = data.map((item) => {
     const cat = EXPENSE_CATEGORIES.find((c) => c.id === item.name);
+    const displayName = cat ? `${cat.label_en} - ${cat.label_bn}` : item.name;
     return {
-      name: cat?.label_en || item.name,
+      name: displayName,
       value: item.value,
       color: cat?.color || '#64748b',
     };

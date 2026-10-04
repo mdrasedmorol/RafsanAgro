@@ -82,6 +82,7 @@ export async function GET(request: Request) {
         t.category.toLowerCase().includes(q)
       );
     }
+    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return NextResponse.json({
       success: true,

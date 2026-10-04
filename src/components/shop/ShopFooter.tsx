@@ -3,9 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { useI18n } from '@/lib/i18n';
+import { useSiteSettings } from '@/stores/settings-store';
 
 export default function ShopFooter() {
   const { t } = useI18n();
+  const { settings } = useSiteSettings();
 
   return (
     <footer className="shop-footer" id="shop-footer">
@@ -50,25 +52,37 @@ export default function ShopFooter() {
             </div>
           </div>
 
-          {/* Contact */}
+          {/* Contact & Map */}
           <div>
             <h4 className="footer-section-title">{t.contact.title}</h4>
             <div>
               <div className="footer-contact-item">
                 <span className="footer-contact-icon">📍</span>
-                <span>Dhaka, Bangladesh</span>
+                <span>{settings.address || 'Dhaka, Bangladesh'}</span>
               </div>
               <div className="footer-contact-item">
                 <span className="footer-contact-icon">📞</span>
-                <span>+880 1XXX-XXXXXX</span>
+                <span>{settings.phone || '+880 1XXX-XXXXXX'}</span>
               </div>
               <div className="footer-contact-item">
                 <span className="footer-contact-icon">✉️</span>
-                <span>info@rafsanagro.com</span>
+                <span>{settings.email || 'info@rafsanagro.com'}</span>
               </div>
               <div className="footer-contact-item">
                 <span className="footer-contact-icon">🕐</span>
                 <span>{t.contact.hoursText}</span>
+              </div>
+
+              {/* Nursery Map Widget */}
+              <div style={{ marginTop: '14px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.15)', height: '130px' }}>
+                <iframe
+                  title="Footer Nursery Location Map"
+                  width="100%"
+                  height="130"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent((settings.address || 'Bazaar Road, Rangpur Sadar, Rangpur') + ', Bangladesh')}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+                />
               </div>
             </div>
           </div>
@@ -76,10 +90,15 @@ export default function ShopFooter() {
 
         <div className="footer-bottom">
           <p className="footer-copyright">{t.footer.copyright}</p>
-          <div className="footer-payment-methods">
-            <span className="footer-payment-badge">💳 bKash</span>
-            <span className="footer-payment-badge">💳 Nagad</span>
-            <span className="footer-payment-badge">💵 COD</span>
+          <div className="footer-payment-section">
+            <span className="footer-payment-title">{t.footer.payWith}</span>
+            <div className="footer-payment-card">
+              <img
+                src="/images/payment-methods.png"
+                alt="We Accept Payment With bKash, Nagad, Rocket"
+                className="footer-payment-img"
+              />
+            </div>
           </div>
         </div>
       </div>

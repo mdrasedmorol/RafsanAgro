@@ -61,7 +61,7 @@ export default function FinanceCashflowPage() {
             <span className="kpi-card-label">Net Cash Position</span>
             <div className="kpi-card-icon"><FiDollarSign size={20} /></div>
           </div>
-          <div className="kpi-card-value" style={{ color: summary.netProfit >= 0 ? '#059669' : '#dc2626' }}>
+          <div className="kpi-card-value" style={{ color: summary.netProfit >= 0 ? '#4BA625' : '#dc2626' }}>
             {formatCurrency(summary.netProfit)}
           </div>
         </div>

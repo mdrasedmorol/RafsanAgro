@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiTrendingDown, FiPlus, FiSearch, FiTrash2, FiCheckCircle } from 'react-icons/fi';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, formatCategoryName } from '@/lib/utils';
 import type { DemoTransaction } from '@/lib/demo-data';
 
 export default function FinanceExpensesPage() {
@@ -12,6 +12,7 @@ export default function FinanceExpensesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     category: 'PURCHASE',
+    customCategory: '',
     amount: '',
     description: '',
     reference: '',
@@ -43,7 +44,15 @@ export default function FinanceExpensesPage() {
   const expenseTransactions = useMemo(() => {
     return transactions.filter((t) => {
       if (t.type !== 'EXPENSE') return false;
-      if (categoryFilter !== 'ALL' && t.category !== categoryFilter) return false;
+      if (categoryFilter !== 'ALL') {
+        if (categoryFilter === 'OTHER') {
+          if (t.category !== 'OTHER' && !t.category.startsWith('OTHER') && ['PURCHASE', 'SALARY', 'RENT', 'TRANSPORT', 'UTILITY', 'MARKETING', 'EQUIPMENT'].includes(t.category)) {
+            return false;
+          }
+        } else if (t.category !== categoryFilter) {
+          return false;
+        }
+      }
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         return (
@@ -53,7 +62,7 @@ export default function FinanceExpensesPage() {
         );
       }
       return true;
-    });
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, categoryFilter, searchQuery]);
 
   const totalExpense = useMemo(() => {
@@ -64,9 +73,14 @@ export default function FinanceExpensesPage() {
     e.preventDefault();
     if (!formData.amount || parseFloat(formData.amount) <= 0) return;
 
+    const isOther = formData.category === 'OTHER' || formData.category === 'OTHER_INCOME';
+    const finalCategory = isOther && formData.customCategory.trim()
+      ? `OTHER: ${formData.customCategory.trim()}`
+      : formData.category;
+
     const payload = {
       type: 'EXPENSE',
-      category: formData.category,
+      category: finalCategory,
       amount: parseFloat(formData.amount),
       description: formData.description || 'Expense entry',
       reference: formData.reference || undefined,
@@ -90,6 +104,7 @@ export default function FinanceExpensesPage() {
       setIsModalOpen(false);
       setFormData({
         category: 'PURCHASE',
+        customCategory: '',
         amount: '',
         description: '',
         reference: '',
@@ -176,14 +191,15 @@ export default function FinanceExpensesPage() {
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
           >
-            <option value="ALL">All Categories</option>
-            <option value="PURCHASE">PURCHASE (Inventory)</option>
-            <option value="SALARY">SALARY (Staff)</option>
-            <option value="RENT">RENT (Shop/Land)</option>
-            <option value="TRANSPORT">TRANSPORT (Logistics)</option>
-            <option value="UTILITY">UTILITY (Bills)</option>
-            <option value="MARKETING">MARKETING (Ads)</option>
-            <option value="OTHER">OTHER</option>
+            <option value="ALL">All Categories - সকল ক্যাটাগরি</option>
+            <option value="PURCHASE">Inventory Purchase - পণ্য ক্রয়</option>
+            <option value="SALARY">Salary & Wages - কর্মী বেতন</option>
+            <option value="RENT">Shop & Land Rent - দোকান ও জমি ভাড়া</option>
+            <option value="TRANSPORT">Transport & Freight - পরিবহন খরচ</option>
+            <option value="UTILITY">Utility Bills - ইউটিলিটি বিল</option>
+            <option value="MARKETING">Marketing & Ads - বিজ্ঞাপন ও প্রচার</option>
+            <option value="EQUIPMENT">Machinery & Equipment - যন্ত্রপাতি ও সরঞ্জাম</option>
+            <option value="OTHER">Other Expense - অন্যান্য ব্যয়</option>
           </select>
         </div>
 
@@ -210,7 +226,7 @@ export default function FinanceExpensesPage() {
                 expenseTransactions.map((t) => (
                   <tr key={t.id}>
                     <td>{formatDate(t.date)}</td>
-                    <td><span className="table-font-bold">{t.category}</span></td>
+                    <td><span className="table-font-bold">{formatCategoryName(t.category)}</span></td>
                     <td>{t.description}</td>
                     <td><span style={{ fontFamily: 'monospace' }}>{t.reference || '—'}</span></td>
                     <td style={{ textAlign: 'right', fontWeight: 700, color: '#dc2626' }}>
@@ -237,14 +253,32 @@ export default function FinanceExpensesPage() {
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Category</label>
                 <select className="select" style={{ width: '100%' }} value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
-                  <option value="PURCHASE">PURCHASE (Stock / Seed / Fertilizer)</option>
-                  <option value="SALARY">SALARY (Worker / Staff Wages)</option>
-                  <option value="RENT">RENT (Shop/Land lease)</option>
-                  <option value="TRANSPORT">TRANSPORT (Delivery / Freight)</option>
-                  <option value="UTILITY">UTILITY (Electricity / Water)</option>
-                  <option value="MARKETING">MARKETING (Advertising)</option>
-                  <option value="OTHER">OTHER EXPENSE</option>
+                  <option value="PURCHASE">Inventory Purchase - পণ্য ক্রয়</option>
+                  <option value="SALARY">Salary & Wages - কর্মী বেতন</option>
+                  <option value="RENT">Shop & Land Rent - দোকান ও জমি ভাড়া</option>
+                  <option value="TRANSPORT">Transport & Freight - পরিবহন খরচ</option>
+                  <option value="UTILITY">Utility Bills - ইউটিলিটি বিল</option>
+                  <option value="MARKETING">Marketing & Ads - বিজ্ঞাপন ও প্রচার</option>
+                  <option value="EQUIPMENT">Machinery & Equipment - যন্ত্রপাতি ও সরঞ্জাম</option>
+                  <option value="OTHER">Others / Other Expense - অন্যান্য ব্যয়</option>
                 </select>
+
+                {(formData.category === 'OTHER' || formData.category === 'OTHER_INCOME') && (
+                  <div style={{ marginTop: '10px' }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>
+                      Specific Category Name / নির্দিষ্ট ক্যাটাগরির নাম *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      className="input"
+                      style={{ width: '100%' }}
+                      placeholder="Enter specific category name (e.g. Machine Repair, Feed Purchase)..."
+                      value={formData.customCategory}
+                      onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
+                    />
+                  </div>
+                )}
               </div>
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Amount (BDT ৳) *</label>

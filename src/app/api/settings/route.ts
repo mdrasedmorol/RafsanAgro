@@ -5,13 +5,25 @@ import { supabaseAdmin } from '@/lib/supabase';
 export async function GET() {
   try {
     let settings = null;
+
+    // 1. Try Prisma
     try {
       settings = await prisma.siteSettings.findUnique({
         where: { id: 'default' },
       });
     } catch (err) {
+      console.warn('Prisma settings fetch failed:', err);
+    }
+
+    // 2. Try Supabase fallback (SiteSettings or site_settings)
+    if (!settings) {
       const { data } = await supabaseAdmin.from('SiteSettings').select('*').eq('id', 'default').single();
-      if (data) settings = data;
+      if (data) {
+        settings = data;
+      } else {
+        const { data: lowerData } = await supabaseAdmin.from('site_settings').select('*').eq('id', 'default').single();
+        if (lowerData) settings = lowerData;
+      }
     }
 
     const defaultFallback = {
@@ -57,6 +69,11 @@ export async function POST(request: Request) {
     } catch (prismaErr) {
       const { data } = await supabaseAdmin.from('SiteSettings').upsert({ id: 'default', ...body }).select().single();
       if (data) updated = data;
+
+      try {
+        const { data: lowerData } = await supabaseAdmin.from('site_settings').upsert({ id: 'default', ...body }).select().single();
+        if (lowerData) updated = lowerData;
+      } catch (e) {}
     }
 
     return NextResponse.json({

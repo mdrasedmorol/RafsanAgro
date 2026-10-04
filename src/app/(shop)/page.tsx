@@ -57,14 +57,14 @@ export default function HomePage() {
           <h1 className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             {lang === 'bn' ? (
               <>
-                <span className="hero-highlight inline-block bg-[length:200%_auto] animate-text-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, #059669, #10b981, #34d399, #10b981, #059669)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                <span className="hero-highlight inline-block bg-[length:200%_auto] animate-text-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, #4BA625, #66c23a, #8dd463, #66c23a, #4BA625)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   প্রিমিয়াম
                 </span>{' '}
                 কৃষি পণ্য উন্নত চাষের জন্য
               </>
             ) : (
               <>
-                <span className="hero-highlight inline-block bg-[length:200%_auto] animate-text-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, #059669, #10b981, #34d399, #10b981, #059669)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                <span className="hero-highlight inline-block bg-[length:200%_auto] animate-text-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, #4BA625, #66c23a, #8dd463, #66c23a, #4BA625)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   Premium
                 </span>{' '}
                 Agricultural Products for Better Farming

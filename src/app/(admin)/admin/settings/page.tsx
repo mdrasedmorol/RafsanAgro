@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { FiSave, FiCheckCircle, FiShield, FiCreditCard, FiTruck, FiSettings } from 'react-icons/fi';
+import { useSettingsStore } from '@/stores/settings-store';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
@@ -54,6 +55,7 @@ export default function AdminSettingsPage() {
       });
       const data = await res.json();
       if (data.success) {
+        useSettingsStore.getState().updateSettings(settings);
         showToast('Settings saved to database successfully!');
       } else {
         showToast('Settings configuration updated!');

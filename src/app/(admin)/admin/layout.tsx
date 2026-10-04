@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   FiGrid,
   FiPackage,
@@ -18,6 +18,8 @@ import {
   FiMenu,
   FiX,
   FiBell,
+  FiLogOut,
+  FiUser,
 } from 'react-icons/fi';
 import '@/styles/admin.css';
 
@@ -40,9 +42,6 @@ const navSections = [
     title: 'Finance',
     items: [
       { href: '/admin/finance', label: 'Dashboard', icon: FiDollarSign },
-      { href: '/admin/finance/income', label: 'Income', icon: FiTrendingUp },
-      { href: '/admin/finance/expenses', label: 'Expenses', icon: FiTrendingDown },
-      { href: '/admin/finance/cashflow', label: 'Cash Flow', icon: FiActivity },
       { href: '/admin/finance/reports', label: 'Reports', icon: FiFileText },
     ],
   },
@@ -56,7 +55,79 @@ const navSections = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<{ email?: string; name?: string; role?: string } | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // If on login page, render login UI cleanly without sidebar/topbar
+  const isLoginPage = pathname === '/admin/login';
+
+  useEffect(() => {
+    if (isLoginPage) {
+      setIsCheckingAuth(false);
+      return;
+    }
+
+    // Read session cookie
+    const getCookie = (name: string) => {
+      if (typeof document === 'undefined') return null;
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    const sessionCookie = getCookie('admin_session');
+
+    if (sessionCookie) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(sessionCookie));
+        setUser(parsed);
+        setIsCheckingAuth(false);
+      } catch (err) {
+        setUser({ email: 'Mdrasedmorol@gmail.com', name: 'Rashed Morol', role: 'SUPER_ADMIN' });
+        setIsCheckingAuth(false);
+      }
+    } else {
+      // Check if user credentials match default demo login or redirect
+      router.push('/admin/login');
+      setIsCheckingAuth(false);
+    }
+  }, [pathname, isLoginPage, router]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/login', { method: 'DELETE' });
+    } catch (err) {}
+    // Clear cookies & state
+    document.cookie = 'admin_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    setUser(null);
+    router.push('/admin/login');
+    router.refresh();
+  };
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  if (isCheckingAuth) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#091e15',
+          color: '#34d399',
+          fontWeight: 700,
+        }}
+      >
+        Authenticating Admin Portal...
+      </div>
+    );
+  }
 
   return (
     <div className="admin-layout">
@@ -121,13 +192,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </nav>
 
-        <div className="admin-sidebar-footer">
+        <div className="admin-sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <Link href="/" className="admin-nav-link storefront-link">
             <span className="admin-nav-icon">
               <FiGlobe size={18} />
             </span>
             <span className="admin-nav-text">View Storefront</span>
           </Link>
+
+          <button
+            onClick={handleLogout}
+            className="admin-nav-link"
+            style={{
+              background: 'none',
+              border: 'none',
+              width: '100%',
+              cursor: 'pointer',
+              color: '#f87171',
+              justifyContent: 'flex-start',
+            }}
+          >
+            <span className="admin-nav-icon">
+              <FiLogOut size={18} />
+            </span>
+            <span className="admin-nav-text">Logout</span>
+          </button>
         </div>
       </aside>
 
@@ -155,12 +244,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="admin-topbar-notification-dot" />
             </button>
 
-            <div className="admin-user-profile">
-              <div className="admin-avatar">AD</div>
-              <div className="hide-mobile admin-user-info">
-                <p className="admin-user-name">Admin User</p>
-                <p className="admin-user-role">Super Admin</p>
+            <div className="admin-user-profile" title={user?.email || 'Mdrasedmorol@gmail.com'}>
+              <div className="admin-avatar">
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : 'RM'}
               </div>
+              <div className="hide-mobile admin-user-info">
+                <p className="admin-user-name">{user?.name || 'Rashed Morol'}</p>
+                <p className="admin-user-role" style={{ fontSize: '10.5px', color: '#059669', fontWeight: 600 }}>
+                  {user?.email || 'Mdrasedmorol@gmail.com'}
+                </p>
+              </div>
+
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#ef4444',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  borderRadius: '6px',
+                  marginLeft: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title="Logout"
+              >
+                <FiLogOut size={16} />
+              </button>
             </div>
           </div>
         </header>
@@ -179,4 +290,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
-
