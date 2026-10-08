@@ -2,11 +2,15 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { useCartStore } from '@/stores/cart-store';
 
+import { ShoppingCart, Menu, X } from '@/components/animate-ui/icons';
+
 export default function ShopHeader() {
   const { t, lang, toggleLang } = useI18n();
+  const pathname = usePathname();
   const cartItems = useCartStore((s) => s.items);
   const openCart = useCartStore((s) => s.openCart);
   const [mounted, setMounted] = React.useState(false);
@@ -18,6 +22,12 @@ export default function ShopHeader() {
 
   const totalItems = mounted ? cartItems.reduce((sum, i) => sum + i.quantity, 0) : 0;
 
+  const isActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <header className="shop-header" id="shop-header">
       <div className="shop-header-inner">
@@ -28,23 +38,20 @@ export default function ShopHeader() {
 
         {/* Navigation */}
         <nav className={`shop-nav ${mobileOpen ? 'mobile-open' : ''}`} id="main-nav">
-          <Link href="/" className="shop-nav-link" id="nav-home">
+          <Link href="/" className={`shop-nav-link ${isActive('/') ? 'active' : ''}`} id="nav-home">
             {t.common.home}
           </Link>
-          <Link href="/products" className="shop-nav-link" id="nav-products">
+          <Link href="/products" className={`shop-nav-link ${isActive('/products') ? 'active' : ''}`} id="nav-products">
             {t.common.products}
           </Link>
-          <Link href="/categories" className="shop-nav-link" id="nav-categories">
-            {t.common.categories}
+          <Link href="/blog" className={`shop-nav-link ${isActive('/blog') ? 'active' : ''}`} id="nav-blog">
+            {t.common.blog}
           </Link>
-          <Link href="/about" className="shop-nav-link" id="nav-about">
+          <Link href="/about" className={`shop-nav-link ${isActive('/about') ? 'active' : ''}`} id="nav-about">
             {t.common.about}
           </Link>
-          <Link href="/contact" className="shop-nav-link" id="nav-contact">
+          <Link href="/contact" className={`shop-nav-link ${isActive('/contact') ? 'active' : ''}`} id="nav-contact">
             {t.common.contact}
-          </Link>
-          <Link href="/track-order" className="shop-nav-link" id="nav-track">
-            {t.order.trackOrder}
           </Link>
         </nav>
 
@@ -63,12 +70,12 @@ export default function ShopHeader() {
 
           {/* Cart */}
           <button
-            className="cart-btn"
+            className="cart-btn flex items-center justify-center"
             onClick={openCart}
             id="cart-btn"
             aria-label="Open cart"
           >
-            🛒
+            <ShoppingCart animateOnHover size={22} />
             {totalItems > 0 && (
               <span className="cart-count" id="cart-count">
                 {totalItems}
@@ -78,12 +85,12 @@ export default function ShopHeader() {
 
           {/* Mobile Menu */}
           <button
-            className="mobile-menu-btn"
+            className="mobile-menu-btn flex items-center justify-center"
             onClick={() => setMobileOpen(!mobileOpen)}
             id="mobile-menu-btn"
             aria-label="Toggle menu"
           >
-            {mobileOpen ? '✕' : '☰'}
+            {mobileOpen ? <X size={20} animateOnHover /> : <Menu size={20} animateOnHover />}
           </button>
         </div>
       </div>
@@ -98,12 +105,11 @@ export default function ShopHeader() {
           flexDirection: 'column',
           gap: 'var(--space-2)',
         }}>
-          <Link href="/" className="shop-nav-link" onClick={() => setMobileOpen(false)}>{t.common.home}</Link>
-          <Link href="/products" className="shop-nav-link" onClick={() => setMobileOpen(false)}>{t.common.products}</Link>
-          <Link href="/categories" className="shop-nav-link" onClick={() => setMobileOpen(false)}>{t.common.categories}</Link>
-          <Link href="/about" className="shop-nav-link" onClick={() => setMobileOpen(false)}>{t.common.about}</Link>
-          <Link href="/contact" className="shop-nav-link" onClick={() => setMobileOpen(false)}>{t.common.contact}</Link>
-          <Link href="/track-order" className="shop-nav-link" onClick={() => setMobileOpen(false)}>{t.order.trackOrder}</Link>
+          <Link href="/" className={`shop-nav-link ${isActive('/') ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>{t.common.home}</Link>
+          <Link href="/products" className={`shop-nav-link ${isActive('/products') ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>{t.common.products}</Link>
+          <Link href="/blog" className={`shop-nav-link ${isActive('/blog') ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>{t.common.blog}</Link>
+          <Link href="/about" className={`shop-nav-link ${isActive('/about') ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>{t.common.about}</Link>
+          <Link href="/contact" className={`shop-nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>{t.common.contact}</Link>
         </nav>
       )}
     </header>

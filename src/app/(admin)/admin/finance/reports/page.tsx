@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiFileText, FiDownload, FiPieChart, FiBarChart2, FiCheckCircle } from 'react-icons/fi';
+import { FiFileText, FiDownload, FiPieChart, FiBarChart2, FiCheckCircle } from '@/components/animate-ui/icons';
 import { formatCurrency } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import type { DemoTransaction } from '@/lib/demo-data';

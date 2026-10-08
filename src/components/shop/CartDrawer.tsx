@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useI18n } from '@/lib/i18n';
 import { useCartStore } from '@/stores/cart-store';
 import { formatPrice } from '@/lib/utils';
+import { ShoppingCart, X, Package, Minus, Plus, Trash2, ArrowRight } from '@/components/animate-ui/icons';
 
 export default function CartDrawer() {
   const { t, lang } = useI18n();
@@ -31,8 +32,8 @@ export default function CartDrawer() {
               {items.length} {lang === 'bn' ? 'টি আইটেম' : 'items'}
             </span>
           </div>
-          <button className="cart-drawer-close" onClick={closeCart} id="cart-close-btn">
-            ✕
+          <button className="cart-drawer-close flex items-center justify-center" onClick={closeCart} id="cart-close-btn">
+            <X size={18} animateOnHover />
           </button>
         </div>
 
@@ -40,27 +41,26 @@ export default function CartDrawer() {
         <div className="cart-drawer-items">
           {items.length === 0 ? (
             <div className="empty-state" style={{ padding: 'var(--space-12) var(--space-4)' }}>
-              <div className="empty-state-icon">🛒</div>
+              <div className="empty-state-icon flex justify-center items-center py-4">
+                <ShoppingCart size={54} className="text-gray-400" animateOnHover />
+              </div>
               <h4 className="empty-state-title">{t.cart.empty}</h4>
               <p className="empty-state-text">{t.cart.emptyText}</p>
               <Link
                 href="/products"
-                className="btn btn-primary"
+                className="btn btn-primary inline-flex items-center gap-2"
                 onClick={closeCart}
                 style={{ marginTop: 'var(--space-4)' }}
               >
-                {t.cart.continueShopping}
+                <span>{t.cart.continueShopping}</span>
+                <ArrowRight size={16} animateOnHover />
               </Link>
             </div>
           ) : (
             items.map((item) => (
               <div key={item.id} className="cart-item">
-                <div className="cart-item-image">
-                  {item.image ? (
-                    <span style={{ fontSize: '2rem' }}>📦</span>
-                  ) : (
-                    <span style={{ fontSize: '2rem' }}>📦</span>
-                  )}
+                <div className="cart-item-image flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded">
+                  <Package size={26} className="text-emerald-600" />
                 </div>
                 <div className="cart-item-info">
                   <p className="cart-item-name">
@@ -71,26 +71,26 @@ export default function CartDrawer() {
                   </p>
                   <div className="cart-item-controls">
                     <button
-                      className="cart-qty-btn"
+                      className="cart-qty-btn flex items-center justify-center"
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                     >
-                      −
+                      <Minus size={12} />
                     </button>
                     <span className="cart-qty-value">{item.quantity}</span>
                     <button
-                      className="cart-qty-btn"
+                      className="cart-qty-btn flex items-center justify-center"
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     >
-                      +
+                      <Plus size={12} />
                     </button>
                   </div>
                 </div>
                 <button
-                  className="cart-item-remove"
+                  className="cart-item-remove flex items-center justify-center"
                   onClick={() => removeItem(item.id)}
                   aria-label="Remove item"
                 >
-                  🗑️
+                  <Trash2 size={16} animateOnHover className="text-red-500 hover:text-red-600" />
                 </button>
               </div>
             ))
@@ -118,8 +118,9 @@ export default function CartDrawer() {
               <span className="cart-summary-total">{formatPrice(total)}</span>
             </div>
             <Link href="/checkout" onClick={closeCart}>
-              <button className="cart-checkout-btn" id="checkout-btn">
-                {t.cart.proceedCheckout} →
+              <button className="cart-checkout-btn flex items-center justify-center gap-2" id="checkout-btn">
+                <span>{t.cart.proceedCheckout}</span>
+                <ArrowRight size={18} animateOnHover />
               </button>
             </Link>
           </div>

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { demoCategories as initialCategories, DemoCategory } from '@/lib/demo-data';
-import { FiPlus, FiEdit2, FiTrash2, FiFolder, FiCheckCircle, FiX } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiFolder, FiCheckCircle, FiX } from '@/components/animate-ui/icons';
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<DemoCategory[]>(initialCategories);

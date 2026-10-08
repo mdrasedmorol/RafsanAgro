@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { useCartStore } from '@/stores/cart-store';
 import { formatPrice, generateOrderNumber } from '@/lib/utils';
+import { User, CreditCard, DollarSign, PhoneCall, ArrowRight, LoaderCircle, ShoppingCart } from '@/components/animate-ui/icons';
 
 export default function CheckoutPage() {
   const { t, lang } = useI18n();
@@ -47,7 +48,9 @@ export default function CheckoutPage() {
     return (
       <div className="container" style={{ padding: 'var(--space-20) var(--container-padding)', textAlign: 'center' }}>
         <div className="empty-state">
-          <div className="empty-state-icon">🛒</div>
+          <div className="empty-state-icon flex justify-center py-4">
+            <ShoppingCart size={54} className="text-gray-400" animateOnHover />
+          </div>
           <h2 className="empty-state-title">{t.cart.empty}</h2>
           <p className="empty-state-text">{t.cart.emptyText}</p>
         </div>
@@ -68,7 +71,10 @@ export default function CheckoutPage() {
             <div>
               {/* Customer Info */}
               <div className="checkout-form-section">
-                <h2 className="checkout-form-title">👤 {t.checkout.customerInfo}</h2>
+                <h2 className="checkout-form-title flex items-center gap-2">
+                  <User size={20} animateOnHover className="text-emerald-600" />
+                  <span>{t.checkout.customerInfo}</span>
+                </h2>
                 <div className="checkout-form-grid">
                   <div className="input-group">
                     <label className="input-label">{t.checkout.name} *</label>
@@ -103,24 +109,33 @@ export default function CheckoutPage() {
 
               {/* Payment Method */}
               <div className="checkout-form-section">
-                <h2 className="checkout-form-title">💳 {t.checkout.paymentMethod}</h2>
+                <h2 className="checkout-form-title flex items-center gap-2">
+                  <CreditCard size={20} animateOnHover className="text-emerald-600" />
+                  <span>{t.checkout.paymentMethod}</span>
+                </h2>
                 <div className="payment-methods">
                   <label className={`payment-method-option ${paymentMethod === 'CASH_ON_DELIVERY' ? 'selected' : ''}`} onClick={() => setPaymentMethod('CASH_ON_DELIVERY')}>
-                    <div className="payment-method-icon" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>💵</div>
+                    <div className="payment-method-icon flex items-center justify-center" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>
+                      <DollarSign size={20} className="text-emerald-600" />
+                    </div>
                     <div>
                       <div className="payment-method-name">{t.checkout.cashOnDelivery}</div>
                       <div className="payment-method-desc">{lang === 'bn' ? 'ডেলিভারির সময় পেমেন্ট করুন' : 'Pay when you receive your order'}</div>
                     </div>
                   </label>
                   <label className={`payment-method-option ${paymentMethod === 'BKASH' ? 'selected' : ''}`} onClick={() => setPaymentMethod('BKASH')}>
-                    <div className="payment-method-icon" style={{ background: 'rgba(220, 53, 69, 0.1)' }}>📱</div>
+                    <div className="payment-method-icon flex items-center justify-center" style={{ background: 'rgba(220, 53, 69, 0.1)' }}>
+                      <PhoneCall size={20} className="text-rose-600" />
+                    </div>
                     <div>
                       <div className="payment-method-name">{t.checkout.bkash}</div>
                       <div className="payment-method-desc">{lang === 'bn' ? 'বিকাশ দিয়ে পেমেন্ট করুন' : 'Pay with bKash mobile wallet'}</div>
                     </div>
                   </label>
                   <label className={`payment-method-option ${paymentMethod === 'NAGAD' ? 'selected' : ''}`} onClick={() => setPaymentMethod('NAGAD')}>
-                    <div className="payment-method-icon" style={{ background: 'rgba(245, 130, 32, 0.1)' }}>📲</div>
+                    <div className="payment-method-icon flex items-center justify-center" style={{ background: 'rgba(245, 130, 32, 0.1)' }}>
+                      <PhoneCall size={20} className="text-orange-600" />
+                    </div>
                     <div>
                       <div className="payment-method-name">{t.checkout.nagad}</div>
                       <div className="payment-method-desc">{lang === 'bn' ? 'নগদ দিয়ে পেমেন্ট করুন' : 'Pay with Nagad mobile wallet'}</div>
@@ -164,15 +179,21 @@ export default function CheckoutPage() {
 
                 <button
                   type="submit"
-                  className="cart-checkout-btn"
+                  className="cart-checkout-btn flex items-center justify-center gap-2"
                   disabled={loading}
                   id="place-order-btn"
                   style={{ marginTop: 'var(--space-6)' }}
                 >
                   {loading ? (
-                    <><span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }} /> {t.checkout.processing}</>
+                    <>
+                      <LoaderCircle size={20} className="animate-spin inline-block mr-2" />
+                      <span>{t.checkout.processing}</span>
+                    </>
                   ) : (
-                    <>{t.checkout.placeOrder} →</>
+                    <>
+                      <span>{t.checkout.placeOrder}</span>
+                      <ArrowRight size={18} animateOnHover />
+                    </>
                   )}
                 </button>
               </div>

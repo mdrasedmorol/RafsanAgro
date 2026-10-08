@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Rafsan Agro — Premium Agricultural Products",
+  title: "Rafsan Agro — A Trusted Friend to Farmers & Modern Agriculture",
   description:
-    "Rafsan Agro is your trusted source for premium agricultural products including seeds, fertilizers, pesticides, and farm tools. Quality products for better farming in Bangladesh.",
+    "Rafsan Agro advances modern agriculture while fostering warm, lifelong relationships with farmers. Providing quality seeds, balanced crop care, and expert farming guidance across Bangladesh.",
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -16,18 +16,21 @@ export const metadata: Metadata = {
   },
   keywords: [
     "agricultural products",
+    "farmers friend",
     "seeds",
     "fertilizers",
     "pesticides",
-    "farm tools",
+    "modern farming",
     "Bangladesh",
     "Rafsan Agro",
+    "কৃষকের বন্ধু",
+    "আধুনিক কৃষি",
     "কৃষি পণ্য",
   ],
   authors: [{ name: "Rafsan Agro" }],
   openGraph: {
-    title: "Rafsan Agro — Premium Agricultural Products",
-    description: "Quality agricultural products for better farming",
+    title: "Rafsan Agro — A Trusted Friend to Farmers & Modern Agriculture",
+    description: "Advancing agriculture while fostering friendly, caring relationships with farmers across Bangladesh.",
     type: "website",
     locale: "en_US",
   },

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
 import { demoProducts, demoCategories } from '@/lib/demo-data';
 import ProductCard from '@/components/shop/ProductCard';
+import { Search } from '@/components/animate-ui/icons';
 
 function ProductsContent() {
   const { t, lang } = useI18n();
@@ -108,7 +109,10 @@ function ProductsContent() {
           }}
         >
           {/* Search */}
-          <div style={{ flex: 1, minWidth: 250 }}>
+          <div style={{ flex: 1, minWidth: 250, position: 'relative' }}>
+            <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-tertiary)' }}>
+              <Search size={18} animateOnHover />
+            </div>
             <input
               type="text"
               className="input"
@@ -116,7 +120,7 @@ function ProductsContent() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               id="product-search"
-              style={{ width: '100%' }}
+              style={{ width: '100%', paddingLeft: '38px' }}
             />
           </div>
 
@@ -201,7 +205,9 @@ function ProductsContent() {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-state-icon">🔍</div>
+            <div className="empty-state-icon flex justify-center items-center py-4">
+              <Search size={54} className="text-gray-400" animateOnHover />
+            </div>
             <h3 className="empty-state-title">{t.common.noResults}</h3>
             <p className="empty-state-text">
               {lang === 'bn'

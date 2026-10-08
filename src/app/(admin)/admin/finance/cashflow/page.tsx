@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiActivity, FiDollarSign, FiTrendingUp, FiTrendingDown, FiCalendar } from 'react-icons/fi';
+import { FiActivity, FiDollarSign, FiTrendingUp, FiTrendingDown, FiCalendar } from '@/components/animate-ui/icons';
 import { formatCurrency } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import type { DemoTransaction } from '@/lib/demo-data';

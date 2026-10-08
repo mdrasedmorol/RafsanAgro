@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useI18n } from '@/lib/i18n';
 import { useCartStore } from '@/stores/cart-store';
 import { formatPrice, calcDiscountPercent } from '@/lib/utils';
+import { ShoppingCart, Star, Sparkles } from '@/components/animate-ui/icons';
 import type { DemoProduct } from '@/lib/demo-data';
 
 interface ProductCardProps {
@@ -65,14 +66,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                 }}
               />
             ) : (
-              <>
-                {product.categorySlug === 'seeds' && '🌱'}
-                {product.categorySlug === 'fertilizers' && '🧪'}
-                {product.categorySlug === 'pesticides' && '🛡️'}
-                {product.categorySlug === 'farm-tools' && '🔧'}
-                {product.categorySlug === 'irrigation' && '💧'}
-                {product.categorySlug === 'animal-feed' && '🐄'}
-              </>
+              <div className="flex items-center justify-center text-emerald-600">
+                <Sparkles size={48} animateOnHover />
+              </div>
             )}
           </div>
           <div className="product-card-badge">
@@ -80,7 +76,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               <span className="discount-badge">{discountPercent}% {t.product.off}</span>
             )}
             {product.isFeatured && (
-              <span className="featured-badge">⭐ Featured</span>
+              <span className="featured-badge inline-flex items-center gap-1">
+                <Star size={12} animateOnHover /> Featured
+              </span>
             )}
           </div>
         </div>
@@ -102,13 +100,16 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <div className="product-card-footer">
         <button
-          className="add-to-cart-btn"
+          className="add-to-cart-btn inline-flex items-center justify-center gap-2"
           onClick={handleAddToCart}
           disabled={product.stock <= 0}
           id={`add-to-cart-${product.id}`}
         >
           {product.stock > 0 ? (
-            <>🛒 {t.common.addToCart}</>
+            <>
+              <ShoppingCart size={16} animateOnHover />
+              <span>{t.common.addToCart}</span>
+            </>
           ) : (
             t.common.outOfStock
           )}

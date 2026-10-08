@@ -1,7 +1,7 @@
 {
   "common": {
     "siteName": "Rafsan Agro",
-    "tagline": "Quality Agricultural Products for Better Farming",
+    "tagline": "A Trusted Friend to Farmers, Advancing Tomorrow's Agriculture",
     "currency": "৳",
     "search": "Search products...",
     "home": "Home",
@@ -9,6 +9,7 @@
     "categories": "Categories",
     "about": "About Us",
     "contact": "Contact",
+    "blog": "Blog",
     "cart": "Cart",
     "checkout": "Checkout",
     "login": "Login",
@@ -37,10 +38,10 @@
     "no": "No"
   },
   "hero": {
-    "title": "Premium Agricultural Products",
-    "subtitle": "From seeds to tools — everything your farm needs to thrive",
-    "cta": "Shop Now",
-    "ctaSecondary": "Browse Categories"
+    "title": "A Trusted Friend to Farmers, Advancing Tomorrow's Agriculture",
+    "subtitle": "We believe real progress begins in the field, side by side with the hardworking farmer. Combining genuine care, expert advice, and modern agro solutions — we turn every season into a fruitful celebration.",
+    "cta": "Explore Agro Products",
+    "ctaSecondary": "Read Farming Advice"
   },
   "product": {
     "featured": "Featured Products",

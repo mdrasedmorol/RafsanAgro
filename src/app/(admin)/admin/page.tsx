@@ -13,7 +13,7 @@ import {
   FiAlertTriangle,
   FiPackage,
   FiLayers,
-} from 'react-icons/fi';
+} from '@/components/animate-ui/icons';
 import { demoOrders, demoTransactions, getFinanceSummary, getMonthlyData, demoProducts } from '@/lib/demo-data';
 import { formatPrice, ORDER_STATUS_COLORS } from '@/lib/utils';
 

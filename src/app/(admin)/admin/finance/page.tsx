@@ -25,7 +25,7 @@ import {
   FiBarChart2,
   FiCheckCircle,
   FiX,
-} from 'react-icons/fi';
+} from '@/components/animate-ui/icons';
 
 export default function AdminFinancePage() {
   const [transactions, setTransactions] = useState<DemoTransaction[]>(initialTransactions);

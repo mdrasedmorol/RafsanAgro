@@ -8,6 +8,7 @@ import { useCartStore } from '@/stores/cart-store';
 import { demoProducts } from '@/lib/demo-data';
 import { formatPrice, calcDiscountPercent } from '@/lib/utils';
 import ProductCard from '@/components/shop/ProductCard';
+import { ShoppingCart, Minus, Plus, ArrowRight, Package } from '@/components/animate-ui/icons';
 
 export default function ProductDetailPage() {
   const { t, lang } = useI18n();
@@ -36,10 +37,14 @@ export default function ProductDetailPage() {
     return (
       <div className="container" style={{ padding: 'var(--space-20) var(--container-padding)', textAlign: 'center' }}>
         <div className="empty-state">
-          <div className="empty-state-icon">😕</div>
+          <div className="empty-state-icon flex justify-center py-4">
+            <Package size={52} className="text-gray-400" />
+          </div>
           <h2 className="empty-state-title">Product Not Found</h2>
-          <Link href="/products" className="btn btn-primary" style={{ marginTop: 'var(--space-4)' }}>
-            {t.common.back} → {t.common.products}
+          <Link href="/products" className="btn btn-primary inline-flex items-center gap-2" style={{ marginTop: 'var(--space-4)' }}>
+            <span>{t.common.back}</span>
+            <ArrowRight size={16} animateOnHover />
+            <span>{t.common.products}</span>
           </Link>
         </div>
       </div>
@@ -209,11 +214,10 @@ export default function ProductDetailPage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 'var(--text-lg)',
                       color: 'var(--text-secondary)',
                     }}
                   >
-                    −
+                    <Minus size={14} />
                   </button>
                   <span style={{
                     width: 44,
@@ -235,15 +239,15 @@ export default function ProductDetailPage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 'var(--text-lg)',
                       color: 'var(--text-secondary)',
                     }}
                   >
-                    +
+                    <Plus size={14} />
                   </button>
                 </div>
-                <button className="btn btn-primary btn-lg" onClick={handleAddToCart} style={{ flex: 1 }}>
-                  🛒 {t.common.addToCart}
+                <button className="btn btn-primary btn-lg inline-flex items-center justify-center gap-2" onClick={handleAddToCart} style={{ flex: 1 }}>
+                  <ShoppingCart size={20} animateOnHover />
+                  <span>{t.common.addToCart}</span>
                 </button>
               </div>
             )}

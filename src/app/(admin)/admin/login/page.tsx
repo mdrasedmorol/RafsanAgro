@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FiLock, FiMail, FiEye, FiEyeOff, FiShield, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { FiLock, FiMail, FiEye, FiEyeOff, FiShield, FiCheckCircle, FiAlertCircle } from '@/components/animate-ui/icons';
 
 export default function AdminLoginPage() {
   const router = useRouter();

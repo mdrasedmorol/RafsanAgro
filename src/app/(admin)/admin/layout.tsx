@@ -20,7 +20,7 @@ import {
   FiBell,
   FiLogOut,
   FiUser,
-} from 'react-icons/fi';
+} from '@/components/animate-ui/icons';
 import '@/styles/admin.css';
 
 const navSections = [

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FiSave, FiCheckCircle, FiShield, FiCreditCard, FiTruck, FiSettings } from 'react-icons/fi';
+import { FiSave, FiCheckCircle, FiShield, FiCreditCard, FiTruck, FiSettings } from '@/components/animate-ui/icons';
 import { useSettingsStore } from '@/stores/settings-store';
 
 export default function AdminSettingsPage() {

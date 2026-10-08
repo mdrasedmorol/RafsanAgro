@@ -17,7 +17,7 @@ import {
   FiDollarSign,
   FiX,
   FiEdit,
-} from 'react-icons/fi';
+} from '@/components/animate-ui/icons';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<DemoOrder[]>(initialOrders);

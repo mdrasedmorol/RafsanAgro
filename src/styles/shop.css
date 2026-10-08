@@ -652,7 +652,179 @@
   box-shadow: none;
 }
 
-/* --- Features Section --- */
+/* --- Features Section — Animated Background --- */
+.features-section-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.features-bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+  pointer-events: none;
+  will-change: transform, border-radius, opacity;
+  z-index: 0;
+}
+
+.features-bg-orb--1 {
+  width: 380px;
+  height: 380px;
+  top: -80px;
+  left: -60px;
+  background: radial-gradient(circle, rgba(75, 166, 37, 0.38) 0%, rgba(61, 138, 30, 0.12) 60%, transparent 100%);
+  animation: features-orb-drift-1 14s ease-in-out infinite alternate;
+}
+
+.features-bg-orb--2 {
+  width: 320px;
+  height: 320px;
+  top: 20%;
+  right: -40px;
+  background: radial-gradient(circle, rgba(27, 122, 61, 0.32) 0%, rgba(75, 166, 37, 0.1) 60%, transparent 100%);
+  animation: features-orb-drift-2 18s ease-in-out infinite alternate;
+}
+
+.features-bg-orb--3 {
+  width: 440px;
+  height: 440px;
+  bottom: -100px;
+  left: 30%;
+  background: radial-gradient(circle, rgba(141, 212, 99, 0.3) 0%, rgba(102, 194, 58, 0.08) 60%, transparent 100%);
+  animation: features-orb-drift-3 20s ease-in-out infinite alternate;
+}
+
+.features-bg-orb--4 {
+  width: 280px;
+  height: 280px;
+  top: 50%;
+  right: 15%;
+  background: radial-gradient(circle, rgba(47, 110, 23, 0.28) 0%, rgba(75, 166, 37, 0.06) 60%, transparent 100%);
+  animation: features-orb-drift-4 16s ease-in-out infinite alternate-reverse;
+}
+
+.features-bg-orb--5 {
+  width: 260px;
+  height: 260px;
+  top: 10%;
+  left: 45%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.18) 0%, rgba(245, 158, 11, 0.06) 60%, transparent 100%);
+  animation: features-orb-drift-5 22s ease-in-out infinite alternate;
+}
+
+@keyframes features-orb-drift-1 {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    border-radius: 50%;
+    opacity: 0.55;
+  }
+  33% {
+    transform: translate(120px, 60px) scale(1.2) rotate(30deg);
+    border-radius: 60% 40% 55% 45% / 45% 55% 45% 55%;
+    opacity: 0.65;
+  }
+  66% {
+    transform: translate(60px, 120px) scale(0.9) rotate(-20deg);
+    border-radius: 45% 55% 40% 60% / 55% 40% 60% 40%;
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate(180px, 30px) scale(1.1) rotate(15deg);
+    border-radius: 55% 45% 50% 50% / 40% 60% 40% 60%;
+    opacity: 0.58;
+  }
+}
+
+@keyframes features-orb-drift-2 {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+  33% {
+    transform: translate(-100px, 80px) scale(1.15) rotate(-35deg);
+    border-radius: 55% 45% 60% 40% / 50% 60% 40% 50%;
+    opacity: 0.62;
+  }
+  66% {
+    transform: translate(-60px, -50px) scale(0.88) rotate(40deg);
+    border-radius: 40% 60% 50% 50% / 60% 35% 65% 40%;
+    opacity: 0.48;
+  }
+  100% {
+    transform: translate(-140px, 100px) scale(1.05) rotate(-15deg);
+    border-radius: 50% 50% 45% 55% / 55% 45% 55% 45%;
+    opacity: 0.55;
+  }
+}
+
+@keyframes features-orb-drift-3 {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    border-radius: 50%;
+    opacity: 0.45;
+  }
+  25% {
+    transform: translate(80px, -60px) scale(1.12) rotate(25deg);
+    border-radius: 60% 40% 45% 55% / 50% 55% 45% 50%;
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(-70px, -90px) scale(0.92) rotate(-30deg);
+    border-radius: 45% 55% 55% 45% / 40% 60% 40% 60%;
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(40px, -30px) scale(1.08) rotate(10deg);
+    border-radius: 55% 45% 50% 50% / 55% 45% 55% 45%;
+    opacity: 0.48;
+  }
+  100% {
+    transform: translate(-40px, -70px) scale(1) rotate(-15deg);
+    border-radius: 50% 50% 60% 40% / 45% 55% 45% 55%;
+    opacity: 0.52;
+  }
+}
+
+@keyframes features-orb-drift-4 {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    border-radius: 50%;
+  }
+  50% {
+    transform: translate(-90px, -70px) scale(1.18) rotate(-40deg);
+    border-radius: 65% 35% 50% 50% / 35% 55% 45% 65%;
+  }
+  100% {
+    transform: translate(70px, -100px) scale(0.95) rotate(30deg);
+    border-radius: 40% 60% 55% 45% / 60% 40% 55% 45%;
+  }
+}
+
+@keyframes features-orb-drift-5 {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    border-radius: 50%;
+    opacity: 0.4;
+  }
+  33% {
+    transform: translate(60px, 50px) scale(1.1) rotate(20deg);
+    border-radius: 55% 45% 60% 40% / 45% 55% 45% 55%;
+    opacity: 0.52;
+  }
+  66% {
+    transform: translate(-80px, 30px) scale(0.9) rotate(-25deg);
+    border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%;
+    opacity: 0.38;
+  }
+  100% {
+    transform: translate(30px, -40px) scale(1.05) rotate(10deg);
+    border-radius: 50% 50% 55% 45% / 50% 50% 45% 55%;
+    opacity: 0.46;
+  }
+}
+
 .features-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1264,6 +1436,19 @@
 }
 
 @media (max-width: 768px) {
+  .features-bg-orb {
+    filter: blur(70px);
+    opacity: 0.4;
+  }
+  .features-bg-orb--1,
+  .features-bg-orb--2,
+  .features-bg-orb--3,
+  .features-bg-orb--4,
+  .features-bg-orb--5 {
+    width: 200px;
+    height: 200px;
+  }
+
   .shop-nav {
     display: none;
   }

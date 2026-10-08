@@ -4,6 +4,7 @@ import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useI18n } from '@/lib/i18n';
+import { PartyPopper, Package, ShoppingCart } from '@/components/animate-ui/icons';
 
 function OrderSuccessContent() {
   const { t, lang } = useI18n();
@@ -13,8 +14,8 @@ function OrderSuccessContent() {
   return (
     <div className="page-enter" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ textAlign: 'center', maxWidth: 500, padding: 'var(--space-8)' }}>
-        <div style={{ fontSize: '5rem', marginBottom: 'var(--space-6)', animation: 'scaleIn 0.5s ease-out' }}>
-          🎉
+        <div className="flex justify-center mb-6">
+          <PartyPopper size={72} className="text-emerald-600" animateOnHover />
         </div>
         <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 800, color: 'var(--green-700)', marginBottom: 'var(--space-4)' }}>
           {t.order.success}
@@ -38,11 +39,13 @@ function OrderSuccessContent() {
         </div>
 
         <div style={{ display: 'flex', gap: 'var(--space-4)', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/track-order" className="btn btn-primary">
-            📦 {t.order.trackOrder}
+          <Link href="/track-order" className="btn btn-primary inline-flex items-center gap-2">
+            <Package size={18} animateOnHover />
+            <span>{t.order.trackOrder}</span>
           </Link>
-          <Link href="/products" className="btn btn-secondary">
-            🛒 {lang === 'bn' ? 'আরো কেনাকাটা' : 'Continue Shopping'}
+          <Link href="/products" className="btn btn-secondary inline-flex items-center gap-2">
+            <ShoppingCart size={18} animateOnHover />
+            <span>{lang === 'bn' ? 'আরো কেনাকাটা' : 'Continue Shopping'}</span>
           </Link>
         </div>
       </div>

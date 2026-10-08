@@ -97,11 +97,13 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   };
 }
 
+import { clsx, type ClassValue } from 'clsx';
+
 /**
  * Class names helper — joins truthy class strings
  */
-export function cn(...classes: (string | false | null | undefined)[]): string {
-  return classes.filter(Boolean).join(' ');
+export function cn(...inputs: ClassValue[]): string {
+  return clsx(inputs);
 }
 
 /**

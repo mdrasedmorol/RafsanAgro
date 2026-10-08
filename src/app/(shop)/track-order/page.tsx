@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { demoOrders } from '@/lib/demo-data';
 import { formatPrice } from '@/lib/utils';
+import { Search, Check, Package } from '@/components/animate-ui/icons';
 
 export default function TrackOrderPage() {
   const { t, lang } = useI18n();
@@ -60,8 +61,9 @@ export default function TrackOrderPage() {
               style={{ flex: 1, background: 'rgba(255,255,255,0.95)', color: 'var(--text-primary)' }}
               required
             />
-            <button type="submit" className="btn btn-accent btn-lg">
-              🔍 {t.order.trackBtn}
+            <button type="submit" className="btn btn-accent btn-lg inline-flex items-center gap-2">
+              <Search size={18} animateOnHover />
+              <span>{t.order.trackBtn}</span>
             </button>
           </form>
           <p style={{ fontSize: 'var(--text-xs)', opacity: 0.5, marginTop: 'var(--space-3)' }}>
@@ -73,7 +75,9 @@ export default function TrackOrderPage() {
       <div className="container" style={{ padding: 'var(--space-10) var(--container-padding)' }}>
         {notFound && (
           <div className="card" style={{ textAlign: 'center', padding: 'var(--space-10)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: 'var(--space-4)' }}>😕</div>
+            <div className="flex justify-center py-4">
+              <Package size={48} className="text-gray-400" />
+            </div>
             <h3>{lang === 'bn' ? 'অর্ডার পাওয়া যায়নি' : 'Order not found'}</h3>
             <p className="text-muted">
               {lang === 'bn' ? 'দয়া করে আপনার অর্ডার নম্বর চেক করুন' : 'Please check your order number and try again'}
@@ -135,7 +139,7 @@ export default function TrackOrderPage() {
                           fontSize: 'var(--text-xs)',
                           transition: 'all 0.3s ease',
                         }}>
-                          {isActive ? '✓' : i + 1}
+                          {isActive ? <Check size={14} animateOnHover /> : i + 1}
                         </div>
                         <span style={{ fontSize: 'var(--text-xs)', color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: isActive ? 600 : 400 }}>
                           {statusLabels[step]?.[lang]}

@@ -18,7 +18,7 @@ import {
   FiCheck,
   FiUploadCloud,
   FiImage,
-} from 'react-icons/fi';
+} from '@/components/animate-ui/icons';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<DemoProduct[]>(initialProducts);

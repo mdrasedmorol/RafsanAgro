@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useI18n } from '@/lib/i18n';
 import { useSiteSettings } from '@/stores/settings-store';
+import { Facebook, Youtube, MessageCircle, MapPin, Phone, Mail, Clock } from '@/components/animate-ui/icons';
 
 export default function ShopFooter() {
   const { t } = useI18n();
@@ -22,9 +23,15 @@ export default function ShopFooter() {
               {t.about.description}
             </p>
             <div className="footer-social">
-              <a href="#" className="footer-social-link" aria-label="Facebook">📘</a>
-              <a href="#" className="footer-social-link" aria-label="YouTube">📺</a>
-              <a href="#" className="footer-social-link" aria-label="WhatsApp">💬</a>
+              <a href="#" className="footer-social-link flex items-center justify-center" aria-label="Facebook">
+                <Facebook size={18} animateOnHover />
+              </a>
+              <a href="#" className="footer-social-link flex items-center justify-center" aria-label="YouTube">
+                <Youtube size={18} animateOnHover />
+              </a>
+              <a href="#" className="footer-social-link flex items-center justify-center" aria-label="WhatsApp">
+                <MessageCircle size={18} animateOnHover />
+              </a>
             </div>
           </div>
 
@@ -56,20 +63,28 @@ export default function ShopFooter() {
           <div>
             <h4 className="footer-section-title">{t.contact.title}</h4>
             <div>
-              <div className="footer-contact-item">
-                <span className="footer-contact-icon">📍</span>
+              <div className="footer-contact-item flex items-center gap-2">
+                <span className="footer-contact-icon flex items-center justify-center">
+                  <MapPin size={16} animateOnHover />
+                </span>
                 <span>{settings.address || 'Dhaka, Bangladesh'}</span>
               </div>
-              <div className="footer-contact-item">
-                <span className="footer-contact-icon">📞</span>
+              <div className="footer-contact-item flex items-center gap-2">
+                <span className="footer-contact-icon flex items-center justify-center">
+                  <Phone size={16} animateOnHover />
+                </span>
                 <span>{settings.phone || '+880 1XXX-XXXXXX'}</span>
               </div>
-              <div className="footer-contact-item">
-                <span className="footer-contact-icon">✉️</span>
+              <div className="footer-contact-item flex items-center gap-2">
+                <span className="footer-contact-icon flex items-center justify-center">
+                  <Mail size={16} animateOnHover />
+                </span>
                 <span>{settings.email || 'info@rafsanagro.com'}</span>
               </div>
-              <div className="footer-contact-item">
-                <span className="footer-contact-icon">🕐</span>
+              <div className="footer-contact-item flex items-center gap-2">
+                <span className="footer-contact-icon flex items-center justify-center">
+                  <Clock size={16} animateOnHover />
+                </span>
                 <span>{t.contact.hoursText}</span>
               </div>
 

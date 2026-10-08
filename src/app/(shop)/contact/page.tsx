@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useI18n } from '@/lib/i18n';
 import { useSiteSettings } from '@/stores/settings-store';
+import { MapPin, Phone, Mail, Clock, Send, Check } from '@/components/animate-ui/icons';
 
 export default function ContactPage() {
   const { t, lang } = useI18n();
@@ -51,8 +52,9 @@ export default function ContactPage() {
                 <label className="input-label">{t.contact.messageLabel}</label>
                 <textarea className="textarea" required style={{ minHeight: 150 }} />
               </div>
-              <button type="submit" className="btn btn-primary btn-lg">
-                {sent ? '✓ ' : ''}{t.contact.send}
+              <button type="submit" className="btn btn-primary btn-lg inline-flex items-center justify-center gap-2">
+                {sent ? <Check size={18} animateOnHover /> : <Send size={18} animateOnHover />}
+                <span>{t.contact.send}</span>
               </button>
               {sent && (
                 <p style={{ color: 'var(--color-success)', fontWeight: 600, textAlign: 'center' }}>
@@ -70,28 +72,36 @@ export default function ContactPage() {
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
                 <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0 }}>📍</div>
+                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <MapPin size={22} className="text-emerald-700" animateOnHover />
+                  </div>
                   <div>
                     <h4 className="font-semibold">{t.contact.address}</h4>
                     <p className="text-sm text-muted">{settings.address || 'Dhaka, Bangladesh'}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0 }}>📞</div>
+                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Phone size={22} className="text-emerald-700" animateOnHover />
+                  </div>
                   <div>
                     <h4 className="font-semibold">{t.contact.phone}</h4>
                     <p className="text-sm text-muted">{settings.phone || '+880 1XXX-XXXXXX'}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0 }}>✉️</div>
+                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Mail size={22} className="text-emerald-700" animateOnHover />
+                  </div>
                   <div>
                     <h4 className="font-semibold">{t.contact.email}</h4>
                     <p className="text-sm text-muted">{settings.email || 'info@rafsanagro.com'}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'flex-start' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.3rem', flexShrink: 0 }}>🕐</div>
+                  <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-lg)', background: 'rgba(26, 107, 66, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Clock size={22} className="text-emerald-700" animateOnHover />
+                  </div>
                   <div>
                     <h4 className="font-semibold">{t.contact.hours}</h4>
                     <p className="text-sm text-muted">{t.contact.hoursText}</p>
@@ -108,7 +118,8 @@ export default function ContactPage() {
             <div style={{ marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div>
                 <h3 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, color: 'var(--green-800)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  📍 {lang === 'bn' ? 'আমাদের নার্সারির অবস্থান' : 'Our Nursery Location'}
+                  <MapPin size={22} className="text-emerald-700" animateOnHover />
+                  <span>{lang === 'bn' ? 'আমাদের নার্সারির অবস্থান' : 'Our Nursery Location'}</span>
                 </h3>
                 <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginTop: '4px' }}>
                   {lang === 'bn' ? 'সার্টিফাইড চারা ও বীজের জন্য সরাসরি নার্সারি পরিদর্শনের আমন্ত্রণ' : 'Visit Rafsan Agro Nursery for certified seeds, saplings, and farming consultation'}

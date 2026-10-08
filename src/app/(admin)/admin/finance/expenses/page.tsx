@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiTrendingDown, FiPlus, FiSearch, FiTrash2, FiCheckCircle } from 'react-icons/fi';
+import { FiTrendingDown, FiPlus, FiSearch, FiTrash2, FiCheckCircle } from '@/components/animate-ui/icons';
 import { formatCurrency, formatDate, formatCategoryName } from '@/lib/utils';
 import type { DemoTransaction } from '@/lib/demo-data';
 
