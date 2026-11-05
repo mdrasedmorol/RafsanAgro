@@ -1,159 +1,97 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useI18n } from '@/lib/i18n';
 import { Search, X, Calendar, Clock, User, ArrowRight } from '@/components/animate-ui/icons';
 
-interface BlogPost {
+interface Article {
   id: string;
-  category: {
-    en: string;
-    bn: string;
-  };
-  title: {
-    en: string;
-    bn: string;
-  };
-  summary: {
-    en: string;
-    bn: string;
-  };
-  content: {
-    en: string;
-    bn: string;
-  };
-  date: {
-    en: string;
-    bn: string;
-  };
-  readTime: {
-    en: string;
-    bn: string;
-  };
-  author: {
-    en: string;
-    bn: string;
-  };
-  icon: string;
-  gradient: string;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  coverImage: string | null;
+  images: string[];
+  videoUrl: string | null;
+  documents: string[];
+  category: string | null;
+  tags: string[];
+  author: string | null;
+  status: string;
+  isFeatured: boolean;
+  publishedAt: string | null;
+  createdAt: string;
 }
 
-const BLOG_POSTS: BlogPost[] = [
-  {
-    id: 'organic-fertilizer-guide',
-    category: { en: 'Soil & Fertilizer', bn: 'সার ও মাটি' },
-    title: {
-      en: 'Maximizing Crop Yield with Organic Fertilizers & Vermicompost',
-      bn: 'জৈব সার ও ভার্মিকম্পোস্ট ব্যবহারে ফসলের ফলন বৃদ্ধির কৌশল',
-    },
-    summary: {
-      en: 'Learn how to balance soil micro-nutrients using balanced organic manure, improving moisture retention and microbial activity for higher returns.',
-      bn: 'মাটির উর্বরতা ও অণুজীবের ভারসাম্য বজায় রেখে কীভাবে ভার্মিকম্পোস্ট ও জৈব সারের সুষম প্রয়োগে ফলন বাড়ানো যায় তার পূর্ণাঙ্গ নির্দেশিকা।',
-    },
-    content: {
-      en: 'Organic fertilizers improve soil structure and enhance water retention capacity. Unlike chemical inputs alone, high-grade vermicompost introduces beneficial micro-flora that activate dormant nutrients. Apply 300-500 kg per acre during land preparation to establish deep root aeration and long-term soil health.',
-      bn: 'জৈব সার মাটির গঠন উন্নত করে এবং জল ধারণ ক্ষমতা বহুগুণ বাড়ায়। শুধু রাসায়নিক সারের উপর নির্ভর না করে সঠিক মাত্রায় কেঁচো সার বা ভার্মিকম্পোস্ট দিলে মাটির উপকারী জীবাণু সক্রিয় হয়। জমি তৈরির সময় একর প্রতি ৩০০-৫০০ কেজি জৈব সার প্রয়োগ করলে শিকড়ের বিস্তার সহজ হয়।',
-    },
-    date: { en: 'October 5, 2026', bn: '৫ অক্টোবর, ২০২৬' },
-    readTime: { en: '4 min read', bn: '৪ মিনিট পাঠ্য' },
-    author: { en: 'Dr. M. Rahman (Agronomist)', bn: 'ড. এম. রহমান (কৃষিবিদ)' },
-    icon: '🌱',
-    gradient: 'linear-gradient(135deg, rgba(75, 166, 37, 0.15), rgba(27, 122, 61, 0.25))',
-  },
-  {
-    id: 'pest-management-monsoon',
-    category: { en: 'Crop Protection', bn: 'বালাইনাশক ও ফসল সুরক্ষা' },
-    title: {
-      en: 'Integrated Pest Management (IPM) for High-Rain Seasons',
-      bn: 'বর্ষা মৌসুমে সমন্বিত বালাই ব্যবস্থাপনা (আইপিএম) এর সহজ উপায়',
-    },
-    summary: {
-      en: 'Effective strategies for managing fungal infections, stem borers, and leaf curl virus during rainy periods without excessive chemical runoff.',
-      bn: 'অতিরিক্ত বৃষ্টির কারণে ফসলে ছত্রাক ও ডাঁটা ছিদ্রকারী পোকার উপদ্রব রোধে নিরাপদ ও পরিবেশবান্ধব সমন্বিত বালাই ব্যবস্থাপনা।',
-    },
-    content: {
-      en: 'During the monsoon, elevated humidity accelerates spore germination for sheath blight and downy mildew. Implement light traps, pheromone lures, and prophylactic copper-based bio-fungicides prior to heavy rain to prevent severe yield loss.',
-      bn: 'বর্ষার আর্দ্র আবহাওয়ায় ব্লাস্ট ও ধসা রোগের ছত্রাক দ্রুত ছড়ায়। ফসলে আলোর ফাঁদ, সেক্স ফেরোমন ট্র্যাপ এবং পরিমিত মাত্রায় প্রতিষেধক ছত্রাকনাশক ব্যবহার করলে ফসল ক্ষয়ক্ষতি থেকে রক্ষা পায়। নিয়মিত জমির নিষ্কাশন নালা পরিষ্কার রাখা অত্যন্ত জরুরি।',
-    },
-    date: { en: 'September 28, 2026', bn: '২৮ সেপ্টেম্বর, ২০২৬' },
-    readTime: { en: '5 min read', bn: '৫ মিনিট পাঠ্য' },
-    author: { en: 'Engr. Rafiqul Islam', bn: 'ইঞ্জি. রফিকুল ইসলাম' },
-    icon: '🛡️',
-    gradient: 'linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(202, 138, 4, 0.25))',
-  },
-  {
-    id: 'hybrid-seed-germination',
-    category: { en: 'Seeds & Propagation', bn: 'বীজ ও চারা' },
-    title: {
-      en: 'Best Practices for 95%+ Hybrid Seed Germination Rates',
-      bn: 'উচ্চফলনশীল হাইব্রিড বীজের ৯৫%+ অঙ্কুরোদগম নিশ্চিত করার টিপস',
-    },
-    summary: {
-      en: 'Essential seed priming, temperature control, and tray seedling nursery techniques for vegetable and hybrid paddy farmers.',
-      bn: 'বীজ শোধন, সঠিক তাপমাত্রায় জাগ দেওয়া ও ট্রে নার্সারিতে চারা তৈরির আধুনিক বৈজ্ঞানিক কলাকৌশল।',
-    },
-    content: {
-      en: 'Treat seeds with a mild fungicide solution before soaking for 18-24 hours. Ensure optimal ambient incubation between 25°C-30°C for uniform sprout emergence before transferring to pro-trays or nursery beds.',
-      bn: 'বীজ ভিজানোর আগে ছত্রাকনাশক বা বীজ শোধনকারী পাউডার দিয়ে শোধন করে নিন। ১৮-২৪ ঘণ্টা ভিজিয়ে রেখে সুতি কাপড়ে সঠিক তাপে জাগ দিলে প্রায় ৯৫% এর বেশি সতেজ অঙ্কুরোদগম নিশ্চিত হয়।',
-    },
-    date: { en: 'September 19, 2026', bn: '১৯ সেপ্টেম্বর, ২০২৬' },
-    readTime: { en: '3 min read', bn: '৩ মিনিট পাঠ্য' },
-    author: { en: 'Rafsan Agro Technical Team', bn: 'রফসান এগ্রো কারিগরি দল' },
-    icon: '🌾',
-    gradient: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.25))',
-  },
-  {
-    id: 'drip-irrigation-smart-farming',
-    category: { en: 'Modern Farming', bn: 'আধুনিক চাষাবাদ' },
-    title: {
-      en: 'Smart Drip Irrigation: Save 60% Water and Increase Quality',
-      bn: 'স্মার্ট ড্রিপ সেচ পদ্ধতি: ৬০% পর্যন্ত পানি সাশ্রয় ও উন্নত মানের ফসল',
-    },
-    summary: {
-      en: 'How micro-irrigation and fertigation drastically reduce operational costs while delivering nutrients straight to plant root zones.',
-      bn: 'ড্রিপ বা ফোঁটা ফোঁটা সেচ পদ্ধতির মাধ্যমে গাছের গোড়ায় সুষম পুষ্টি ও সার পৌঁছে দিয়ে পানির অপচয় রোধ ও বাম্পার ফলন।',
-    },
-    content: {
-      en: 'Drip irrigation combined with soluble fertigation ensures optimal root-zone nourishment with minimal evaporation loss. Farms transitioning to localized drip see an average of 35% higher commercial grade produce and up to 60% savings on water energy bills.',
-      bn: 'ড্রিপ সেচের সাহায্যে পানির সাথে মিশে সরাসরি গাছের গোড়ায় দ্রবণীয় সার পৌঁছে যায় (ফার্টিগেশন)। এতে আগাছা জন্মায় না এবং প্রচলিত সেচের চেয়ে ৬০% কম পানিতে ৩৫% বেশি উন্নত মানের বাণিজ্যিক ফসল উৎপাদন সম্ভব।',
-    },
-    date: { en: 'September 10, 2026', bn: '১০ সেপ্টেম্বর, ২০২৬' },
-    readTime: { en: '6 min read', bn: '৬ মিনিট পাঠ্য' },
-    author: { en: 'Kamrul Hasan (Irrigation Spec.)', bn: 'কামরুল হাসান (সেচ বিশেষজ্ঞ)' },
-    icon: '💧',
-    gradient: 'linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(13, 148, 136, 0.25))',
-  },
-];
+// Gradient mapping for categories
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  'Soil & Fertilizer': 'linear-gradient(135deg, rgba(75, 166, 37, 0.15), rgba(27, 122, 61, 0.25))',
+  'Crop Protection': 'linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(202, 138, 4, 0.25))',
+  'Seeds & Propagation': 'linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.25))',
+  'Modern Farming': 'linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(13, 148, 136, 0.25))',
+  'Market & Pricing': 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.25))',
+  'Technology': 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.25))',
+  'News & Updates': 'linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(225, 29, 72, 0.25))',
+  'General': 'linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.25))',
+};
 
-const CATEGORIES = [
-  { id: 'all', en: 'All Articles', bn: 'সকল নিবন্ধ' },
-  { id: 'Soil & Fertilizer', en: 'Soil & Fertilizer', bn: 'সার ও মাটি' },
-  { id: 'Crop Protection', en: 'Crop Protection', bn: 'বালাইনাশক ও ফসল সুরক্ষা' },
-  { id: 'Seeds & Propagation', en: 'Seeds & Propagation', bn: 'বীজ ও চারা' },
-  { id: 'Modern Farming', en: 'Modern Farming', bn: 'আধুনিক চাষাবাদ' },
-];
+const CATEGORY_ICONS: Record<string, string> = {
+  'Soil & Fertilizer': '🌱',
+  'Crop Protection': '🛡️',
+  'Seeds & Propagation': '🌾',
+  'Modern Farming': '💧',
+  'Market & Pricing': '📊',
+  'Technology': '💻',
+  'News & Updates': '📰',
+  'General': '📝',
+};
 
 export default function BlogPage() {
   const { lang } = useI18n();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeArticle, setActiveArticle] = useState<BlogPost | null>(null);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch published articles from the database
+  useEffect(() => {
+    const fetchArticles = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/articles?status=PUBLISHED');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setArticles(json.data);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch articles:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchArticles();
+  }, []);
+
+  // Extract unique categories
+  const categories = useMemo(() => {
+    const cats = new Set(articles.map((a) => a.category).filter(Boolean));
+    return ['all', ...Array.from(cats)] as string[];
+  }, [articles]);
 
   const filteredPosts = useMemo(() => {
-    return BLOG_POSTS.filter((post) => {
+    return articles.filter((post) => {
       const matchesCategory =
-        selectedCategory === 'all' || post.category.en === selectedCategory;
-      const title = lang === 'bn' ? post.title.bn : post.title.en;
-      const summary = lang === 'bn' ? post.summary.bn : post.summary.en;
+        selectedCategory === 'all' || post.category === selectedCategory;
       const query = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !query ||
-        title.toLowerCase().includes(query) ||
-        summary.toLowerCase().includes(query);
+        post.title.toLowerCase().includes(query) ||
+        (post.summary || '').toLowerCase().includes(query) ||
+        (post.author || '').toLowerCase().includes(query);
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery, lang]);
+  }, [selectedCategory, searchQuery, articles]);
 
   return (
     <div className="page-enter" style={{ minHeight: '80vh', paddingBottom: 'var(--space-16)' }}>
@@ -252,7 +190,7 @@ export default function BlogPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={
-                lang === 'bn' ? 'আর্টিকেল বা বিষয় অনুসন্ধান করুন...' : 'Search articles, topics or keywords...'
+                lang === 'bn' ? 'আর্টিকেল বা বিষয় অনুসন্ধান করুন...' : 'Search articles, topics or keywords...'
               }
               style={{
                 width: '100%',
@@ -306,43 +244,49 @@ export default function BlogPage() {
       {/* Main Content Area */}
       <div className="container" style={{ padding: 'var(--space-8) var(--container-padding)' }}>
         {/* Category Pills */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '10px',
-            marginBottom: 'var(--space-8)',
-            justifyContent: 'center',
-          }}
-        >
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '9999px',
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  border: isSelected
-                    ? '1px solid #3D8A1E'
-                    : '1px solid var(--border-light, #e2e8f0)',
-                  background: isSelected
-                    ? 'linear-gradient(135deg, #4BA625, #3D8A1E)'
-                    : 'var(--bg-secondary, #ffffff)',
-                  color: isSelected ? '#ffffff' : 'var(--text-secondary, #475569)',
-                  boxShadow: isSelected ? '0 4px 12px rgba(75, 166, 37, 0.25)' : 'none',
-                }}
-              >
-                {lang === 'bn' ? cat.bn : cat.en}
-              </button>
-            );
-          })}
-        </div>
+        {categories.length > 1 && (
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '10px',
+              marginBottom: 'var(--space-8)',
+              justifyContent: 'center',
+            }}
+          >
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '9999px',
+                    fontSize: 'var(--text-sm)',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    border: isSelected
+                      ? '1px solid #3D8A1E'
+                      : '1px solid var(--border-light, #e2e8f0)',
+                    background: isSelected
+                      ? 'linear-gradient(135deg, #4BA625, #3D8A1E)'
+                      : 'var(--bg-secondary, #ffffff)',
+                    color: isSelected ? '#ffffff' : 'var(--text-secondary, #475569)',
+                    boxShadow: isSelected ? '0 4px 12px rgba(75, 166, 37, 0.25)' : 'none',
+                  }}
+                >
+                  {cat === 'all'
+                    ? lang === 'bn'
+                      ? 'সকল নিবন্ধ'
+                      : 'All Articles'
+                    : cat}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Results Count */}
         <div
@@ -356,7 +300,11 @@ export default function BlogPage() {
           }}
         >
           <span>
-            {lang === 'bn'
+            {isLoading
+              ? lang === 'bn'
+                ? 'লোড হচ্ছে...'
+                : 'Loading...'
+              : lang === 'bn'
               ? `${filteredPosts.length} টি নিবন্ধ পাওয়া গেছে`
               : `Showing ${filteredPosts.length} article${filteredPosts.length !== 1 ? 's' : ''}`}
           </span>
@@ -376,7 +324,18 @@ export default function BlogPage() {
         </div>
 
         {/* Blog Post Grid */}
-        {filteredPosts.length === 0 ? (
+        {isLoading ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: 'var(--space-16) 0',
+              color: '#64748b',
+              fontWeight: 600,
+            }}
+          >
+            {lang === 'bn' ? 'নিবন্ধ লোড হচ্ছে...' : 'Loading articles...'}
+          </div>
+        ) : filteredPosts.length === 0 ? (
           <div
             style={{
               textAlign: 'center',
@@ -392,18 +351,24 @@ export default function BlogPage() {
             </h3>
             <p style={{ color: 'var(--text-secondary, #64748b)', marginBottom: 'var(--space-4)' }}>
               {lang === 'bn'
-                ? 'অন্য কোনো শব্দ দিয়ে অনুসন্ধান করুন বা ফিল্টার পরিবর্তন করুন।'
+                ? articles.length === 0
+                  ? 'শীঘ্রই নিবন্ধ প্রকাশিত হবে।'
+                  : 'অন্য কোনো শব্দ দিয়ে অনুসন্ধান করুন বা ফিল্টার পরিবর্তন করুন।'
+                : articles.length === 0
+                ? 'Articles will be published soon. Stay tuned!'
                 : 'Try searching with different keywords or selecting another category.'}
             </p>
-            <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSearchQuery('');
-              }}
-              className="btn btn-secondary"
-            >
-              {lang === 'bn' ? 'সব দেখুন' : 'Reset Filters'}
-            </button>
+            {articles.length > 0 && (
+              <button
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSearchQuery('');
+                }}
+                className="btn btn-secondary"
+              >
+                {lang === 'bn' ? 'সব দেখুন' : 'Reset Filters'}
+              </button>
+            )}
           </div>
         ) : (
           <div
@@ -413,310 +378,215 @@ export default function BlogPage() {
               gap: 'var(--space-6)',
             }}
           >
-            {filteredPosts.map((post) => (
-              <article
-                key={post.id}
-                style={{
-                  background: 'var(--bg-secondary, #ffffff)',
-                  borderRadius: 'var(--radius-xl, 16px)',
-                  border: '1px solid var(--border-light, #e2e8f0)',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(75, 166, 37, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.04)';
-                }}
-                onClick={() => setActiveArticle(post)}
-              >
-                {/* Visual Header / Badge */}
-                <div
-                  style={{
-                    background: post.gradient,
-                    padding: 'var(--space-6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    borderBottom: '1px solid rgba(0,0,0,0.05)',
-                  }}
+            {filteredPosts.map((post) => {
+              const gradient =
+                CATEGORY_GRADIENTS[post.category || ''] || CATEGORY_GRADIENTS['General'];
+              const icon = CATEGORY_ICONS[post.category || ''] || '📝';
+              const displayDate = post.publishedAt || post.createdAt;
+              const readTime = Math.max(1, Math.ceil(post.content.split(/\s+/).length / 200));
+
+              return (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  <span
+                  <article
                     style={{
-                      background: 'rgba(255,255,255,0.85)',
-                      backdropFilter: 'blur(4px)',
-                      padding: '4px 12px',
-                      borderRadius: '9999px',
-                      fontSize: 'var(--text-xs)',
-                      fontWeight: 700,
-                      color: '#1B7A3D',
-                    }}
-                  >
-                    {lang === 'bn' ? post.category.bn : post.category.en}
-                  </span>
-                  <span style={{ fontSize: '1.75rem' }}>{post.icon}</span>
-                </div>
-
-                {/* Article Body */}
-                <div style={{ padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                  <div
-                    style={{
+                      background: 'var(--bg-secondary, #ffffff)',
+                      borderRadius: 'var(--radius-xl, 16px)',
+                      border: '1px solid var(--border-light, #e2e8f0)',
+                      overflow: 'hidden',
                       display: 'flex',
-                      gap: '8px',
-                      alignItems: 'center',
-                      fontSize: 'var(--text-xs)',
-                      color: 'var(--text-tertiary, #94a3b8)',
-                      marginBottom: 'var(--space-3)',
+                      flexDirection: 'column',
+                      transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+                      height: '100%',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 12px 28px rgba(75, 166, 37, 0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.04)';
                     }}
                   >
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar size={13} animateOnHover />
-                      {lang === 'bn' ? post.date.bn : post.date.en}
-                    </span>
-                    <span>•</span>
-                    <span className="inline-flex items-center gap-1">
-                      <Clock size={13} animateOnHover />
-                      {lang === 'bn' ? post.readTime.bn : post.readTime.en}
-                    </span>
-                  </div>
+                    {/* Cover or gradient header */}
+                    {post.coverImage ? (
+                      <div
+                        style={{
+                          height: '180px',
+                          overflow: 'hidden',
+                          position: 'relative',
+                        }}
+                      >
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '12px',
+                            left: '12px',
+                            background: 'rgba(255,255,255,0.9)',
+                            backdropFilter: 'blur(4px)',
+                            padding: '4px 12px',
+                            borderRadius: '9999px',
+                            fontSize: 'var(--text-xs)',
+                            fontWeight: 700,
+                            color: '#1B7A3D',
+                          }}
+                        >
+                          {post.category || 'Article'}
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          background: gradient,
+                          padding: 'var(--space-6)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          borderBottom: '1px solid rgba(0,0,0,0.05)',
+                        }}
+                      >
+                        <span
+                          style={{
+                            background: 'rgba(255,255,255,0.85)',
+                            backdropFilter: 'blur(4px)',
+                            padding: '4px 12px',
+                            borderRadius: '9999px',
+                            fontSize: 'var(--text-xs)',
+                            fontWeight: 700,
+                            color: '#1B7A3D',
+                          }}
+                        >
+                          {post.category || 'Article'}
+                        </span>
+                        <span style={{ fontSize: '1.75rem' }}>{icon}</span>
+                      </div>
+                    )}
 
-                  <h2
-                    style={{
-                      fontSize: 'var(--text-lg)',
-                      fontWeight: 800,
-                      lineHeight: 1.4,
-                      marginBottom: 'var(--space-3)',
-                      color: 'var(--text-primary, #0f172a)',
-                    }}
-                  >
-                    {lang === 'bn' ? post.title.bn : post.title.en}
-                  </h2>
-
-                  <p
-                    style={{
-                      fontSize: 'var(--text-sm)',
-                      color: 'var(--text-secondary, #475569)',
-                      lineHeight: 'var(--leading-relaxed)',
-                      marginBottom: 'var(--space-6)',
-                      flexGrow: 1,
-                    }}
-                  >
-                    {lang === 'bn' ? post.summary.bn : post.summary.en}
-                  </p>
-
-                  <div
-                    style={{
-                      borderTop: '1px solid var(--border-light, #f1f5f9)',
-                      paddingTop: 'var(--space-4)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <span
+                    {/* Article Body */}
+                    <div
                       style={{
-                        fontSize: 'var(--text-xs)',
-                        color: 'var(--text-secondary, #64748b)',
-                        fontWeight: 500,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
+                        padding: 'var(--space-6)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flexGrow: 1,
                       }}
                     >
-                      <User size={12} animateOnHover />
-                      {lang === 'bn' ? post.author.bn : post.author.en}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 'var(--text-sm)',
-                        fontWeight: 700,
-                        color: '#4BA625',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <span>{lang === 'bn' ? 'বিস্তারিত পড়ুন' : 'Read Article'}</span>
-                      <ArrowRight size={14} animateOnHover />
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '8px',
+                          alignItems: 'center',
+                          fontSize: 'var(--text-xs)',
+                          color: 'var(--text-tertiary, #94a3b8)',
+                          marginBottom: 'var(--space-3)',
+                        }}
+                      >
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar size={13} animateOnHover />
+                          {displayDate
+                            ? new Date(displayDate).toLocaleDateString(
+                                lang === 'bn' ? 'bn-BD' : 'en-US',
+                                { month: 'short', day: 'numeric', year: 'numeric' }
+                              )
+                            : ''}
+                        </span>
+                        <span>•</span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock size={13} animateOnHover />
+                          {readTime} {lang === 'bn' ? 'মিনিট পাঠ্য' : 'min read'}
+                        </span>
+                      </div>
+
+                      <h2
+                        style={{
+                          fontSize: 'var(--text-lg)',
+                          fontWeight: 800,
+                          lineHeight: 1.4,
+                          marginBottom: 'var(--space-3)',
+                          color: 'var(--text-primary, #0f172a)',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {post.title}
+                      </h2>
+
+                      <p
+                        style={{
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--text-secondary, #475569)',
+                          lineHeight: 'var(--leading-relaxed)',
+                          marginBottom: 'var(--space-6)',
+                          flexGrow: 1,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {post.summary || post.content.substring(0, 150) + '...'}
+                      </p>
+
+                      <div
+                        style={{
+                          borderTop: '1px solid var(--border-light, #f1f5f9)',
+                          paddingTop: 'var(--space-4)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 'var(--text-xs)',
+                            color: 'var(--text-secondary, #64748b)',
+                            fontWeight: 500,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <User size={12} animateOnHover />
+                          {post.author || (lang === 'bn' ? 'রফসান এগ্রো' : 'Rafsan Agro')}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 'var(--text-sm)',
+                            fontWeight: 700,
+                            color: '#4BA625',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <span>{lang === 'bn' ? 'বিস্তারিত পড়ুন' : 'Read Article'}</span>
+                          <ArrowRight size={14} animateOnHover />
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
-
-      {/* Article Detail Modal */}
-      {activeArticle && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.6)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 9999,
-            padding: 'var(--space-4)',
-          }}
-          onClick={() => setActiveArticle(null)}
-        >
-          <div
-            style={{
-              background: 'var(--bg-primary, #ffffff)',
-              borderRadius: 'var(--radius-2xl, 20px)',
-              maxWidth: '680px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              position: 'relative',
-              padding: 'var(--space-8)',
-              border: '1px solid var(--border-light, #e2e8f0)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setActiveArticle(null)}
-              style={{
-                position: 'absolute',
-                top: '18px',
-                right: '18px',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                background: 'var(--bg-secondary, #f1f5f9)',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-secondary, #475569)',
-              }}
-              aria-label="Close"
-            >
-              <X size={18} animateOnHover />
-            </button>
-
-            <div
-              style={{
-                display: 'inline-block',
-                background: 'rgba(75, 166, 37, 0.12)',
-                color: '#1B7A3D',
-                padding: '4px 12px',
-                borderRadius: '9999px',
-                fontSize: 'var(--text-xs)',
-                fontWeight: 700,
-                marginBottom: 'var(--space-3)',
-              }}
-            >
-              {lang === 'bn' ? activeArticle.category.bn : activeArticle.category.en}
-            </div>
-
-            <h2
-              style={{
-                fontSize: 'var(--text-2xl)',
-                fontWeight: 800,
-                lineHeight: 1.3,
-                marginBottom: 'var(--space-4)',
-                color: 'var(--text-primary, #0f172a)',
-              }}
-            >
-              {lang === 'bn' ? activeArticle.title.bn : activeArticle.title.en}
-            </h2>
-
-            <div
-              style={{
-                display: 'flex',
-                gap: '12px',
-                alignItems: 'center',
-                fontSize: 'var(--text-xs)',
-                color: 'var(--text-secondary, #64748b)',
-                marginBottom: 'var(--space-6)',
-                paddingBottom: 'var(--space-4)',
-                borderBottom: '1px solid var(--border-light, #e2e8f0)',
-                flexWrap: 'wrap',
-              }}
-            >
-              <span className="inline-flex items-center gap-1">
-                <User size={13} animateOnHover />
-                {lang === 'bn' ? activeArticle.author.bn : activeArticle.author.en}
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1">
-                <Calendar size={13} animateOnHover />
-                {lang === 'bn' ? activeArticle.date.bn : activeArticle.date.en}
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1">
-                <Clock size={13} animateOnHover />
-                {lang === 'bn' ? activeArticle.readTime.bn : activeArticle.readTime.en}
-              </span>
-            </div>
-
-            <div
-              style={{
-                fontSize: 'var(--text-base)',
-                lineHeight: 1.8,
-                color: 'var(--text-primary, #334155)',
-                marginBottom: 'var(--space-6)',
-              }}
-            >
-              <p style={{ marginBottom: 'var(--space-4)' }}>
-                {lang === 'bn' ? activeArticle.summary.bn : activeArticle.summary.en}
-              </p>
-              <p>
-                {lang === 'bn' ? activeArticle.content.bn : activeArticle.content.en}
-              </p>
-            </div>
-
-            <div
-              style={{
-                background: 'var(--bg-secondary, #f8fafc)',
-                padding: 'var(--space-4)',
-                borderRadius: 'var(--radius-lg, 12px)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '12px',
-              }}
-            >
-              <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary, #64748b)' }}>
-                {lang === 'bn'
-                  ? 'প্রয়োজনীয় সার ও বীজ অনলাইনে অর্ডার করতে ভিজিট করুন'
-                  : 'Order quality seeds & fertilizers online directly'}
-              </span>
-              <Link
-                href="/products"
-                onClick={() => setActiveArticle(null)}
-                style={{
-                  background: 'linear-gradient(135deg, #4BA625, #3D8A1E)',
-                  color: '#ffffff',
-                  padding: '8px 16px',
-                  borderRadius: '9999px',
-                  fontSize: 'var(--text-sm)',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                }}
-              >
-                {lang === 'bn' ? 'পণ্য দেখুন →' : 'View Products →'}
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

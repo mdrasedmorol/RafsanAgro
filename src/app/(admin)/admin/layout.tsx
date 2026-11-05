@@ -20,6 +20,7 @@ import {
   FiBell,
   FiLogOut,
   FiUser,
+  FiEdit,
 } from '@/components/animate-ui/icons';
 import '@/styles/admin.css';
 
@@ -36,6 +37,12 @@ const navSections = [
       { href: '/admin/products', label: 'Products', icon: FiPackage },
       { href: '/admin/categories', label: 'Categories', icon: FiTag },
       { href: '/admin/orders', label: 'Orders', icon: FiShoppingCart, badge: 3 },
+    ],
+  },
+  {
+    title: 'Content',
+    items: [
+      { href: '/admin/articles', label: 'Blog Articles', icon: FiEdit },
     ],
   },
   {
